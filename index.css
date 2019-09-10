@@ -187,7 +187,7 @@ i.icon-lock {
 
 #riverEditor > *,
 #routeEditor > *,
-#labelEditor div, 
+#labelEditor div,
 #markerEditor div,
 #burgEditor * {
 	display: inline-block;
@@ -402,10 +402,10 @@ input[type="color"]::-webkit-color-swatch-wrapper {
 	-moz-appearance: textfield;
 }
 
-#optionsContent input[type=number]::-webkit-inner-spin-button, 
-#optionsContent input[type=number]::-webkit-outer-spin-button { 
-	-webkit-appearance: none; 
-	margin: 0; 
+#optionsContent input[type=number]::-webkit-inner-spin-button,
+#optionsContent input[type=number]::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
 }
 
 #optionsContent input[type="number"]:hover {
@@ -459,7 +459,7 @@ input[type="color"]::-webkit-color-swatch-wrapper {
 #styleElements input[type="number"] {
 	width: 52px;
 	border: 0;
-	padding-left: 2.5px;	
+	padding-left: 2.5px;
 }
 
 #sticked button {
@@ -786,7 +786,7 @@ body button.noicon {
 }
 
 #templateBody > div > i {
-	float: right; 
+	float: right;
 }
 
 #templateBody input,
@@ -1806,7 +1806,7 @@ svg.button {
 
 #alertMessage ul {
 	padding-left: 15px;
-	margin: 10px 0; 
+	margin: 10px 0;
 }
 
 #info-line {
@@ -1921,7 +1921,7 @@ svg.button {
 #legend {
 	cursor: move;
 	-moz-user-select: none;
-	user-select: none;	
+	user-select: none;
 }
 
 .dontAsk {
@@ -1948,7 +1948,7 @@ svg.button {
 		margin: 0;
 		border: 0;
 	}
-	
+
 	#options {
 		height: 100vh;
 		width: 100vw;
@@ -1957,7 +1957,7 @@ svg.button {
 	table {
 		width: 100%;
 	}
-	
+
 	.tabcontent {
 		max-width: 100%;
 	}

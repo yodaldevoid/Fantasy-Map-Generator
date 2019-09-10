@@ -47,7 +47,7 @@ function editMarker() {
   function dragMarker() {
     const tr = parseTransform(this.getAttribute("transform"));
     const x = +tr[0] - d3.event.x, y = +tr[1] - d3.event.y;
-  
+
     d3.event.on("drag", function() {
       const transform = `translate(${(x + d3.event.x)},${(y + d3.event.y)})`;
       this.setAttribute("transform", transform);
@@ -466,7 +466,7 @@ function editMarker() {
   function togglePinVisibility() {
     const id = elSelected.attr("data-id");
     let show = 1;
-    if (this.className === "icon-info-circled") {this.className = "icon-info"; show = 0; } 
+    if (this.className === "icon-info-circled") {this.className = "icon-info"; show = 0; }
     else this.className = "icon-info-circled";
     d3.select(id).select("circle").attr("opacity", show);
     d3.select(id).select("path").attr("opacity", show);

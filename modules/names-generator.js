@@ -36,7 +36,7 @@
   const updateChain = (b) => chains[b] = nameBase[b] ? calculateChain(b) : null;
 
   // update chains for all used bases
-  const updateChains = () => chains.forEach((c, i) => chains[i] = nameBase[i] ? calculateChain(i) : null); 
+  const updateChains = () => chains.forEach((c, i) => chains[i] = nameBase[i] ? calculateChain(i) : null);
 
   // generate name using Markov's chain
   const getBase = function(base, min, max, dupl, multi) {
@@ -45,8 +45,8 @@
 
     const data = chains[base];
     if (!data || data[" "] === undefined) {
-      tip("Namesbase " + base + " is incorrect. Please check in namesbase editor", false, "error"); 
-      console.error("nameBase " + base + " is incorrect!"); 
+      tip("Namesbase " + base + " is incorrect. Please check in namesbase editor", false, "error");
+      console.error("nameBase " + base + " is incorrect!");
       return "ERROR";
     }
 

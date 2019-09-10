@@ -77,7 +77,7 @@ function editNotes(id, name) {
       });
       return;
     }
-    
+
     highlightElement(element); // if element is found
   }
 

@@ -74,7 +74,7 @@ function editBurg() {
     document.getElementById("burgGroupSection").style.display = "none";
     document.getElementById("burgInputGroup").style.display = "none";
     document.getElementById("burgInputGroup").value = "";
-    document.getElementById("burgSelectGroup").style.display = "inline-block"; 
+    document.getElementById("burgSelectGroup").style.display = "inline-block";
   }
 
   function changeGroup() {
@@ -155,7 +155,7 @@ function editBurg() {
     const burgsToRemove = burgsInGroup.filter(b => !pack.burgs[b].capital);
     const capital = burgsToRemove.length < burgsInGroup.length;
 
-    alertMessage.innerHTML = `Are you sure you want to remove 
+    alertMessage.innerHTML = `Are you sure you want to remove
       ${basic || capital ? "all elements in the group" : "the entire burg group"}?
       <br>Please note that capital burgs will not be deleted.
       <br><br>Burgs to be removed: ${burgsToRemove.length}`;

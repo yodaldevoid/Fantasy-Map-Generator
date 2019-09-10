@@ -151,7 +151,7 @@ function editZones() {
 
       const selection = r > 5 ? findAll(p[0], p[1], r) : [findCell(p[0], p[1], r)];
       if (!selection) return;
-  
+
       const selected = body.querySelector("div.selected");
       const zone = zones.select("#"+selected.dataset.id);
       const base = zone.attr("id") + "_"; // id generic part
@@ -348,7 +348,7 @@ function editZones() {
     link.download = "zones_data" + Date.now() + ".csv";
     link.href = url;
     link.click();
-    window.setTimeout(function() {window.URL.revokeObjectURL(url);}, 2000);    
+    window.setTimeout(function() {window.URL.revokeObjectURL(url);}, 2000);
   }
 
   function toggleEraseMode() {

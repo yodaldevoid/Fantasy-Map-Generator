@@ -224,7 +224,7 @@ const OCEAN_HEIGHT = 20;
       case 10: return .93;
     }
   }
-  
+
   const addHill = function(count, height, rangeX, rangeY) {
     count = getNumberInRange(count);
     const power = getBlobPower();
@@ -303,7 +303,7 @@ const OCEAN_HEIGHT = 20;
       // find start and end points
       const startX = getPointInRange(rangeX, graphWidth);
       const startY = getPointInRange(rangeY, graphHeight);
-      
+
       let dist = 0, limit = 0, endX, endY;
       do {
         endX = Math.random() * graphWidth * .8 + graphWidth * .1;
@@ -392,7 +392,7 @@ const OCEAN_HEIGHT = 20;
         limit++;
       } while ((dist < graphWidth / 8 || dist > graphWidth / 2) && limit < 50)
 
-      let range = getRange(start, findGridCell(endX, endY));  
+      let range = getRange(start, findGridCell(endX, endY));
 
       // get main ridge
       function getRange(cur, end) {
@@ -462,7 +462,7 @@ const OCEAN_HEIGHT = 20;
 
     function getRange(cur, end) {
       const range = [];
-      
+
       while (cur !== end) {
         let min = Infinity;
         cells.c[cur].forEach(function(e) {
@@ -475,7 +475,7 @@ const OCEAN_HEIGHT = 20;
 
       return range;
     }
-    
+
     const step = .1 / width;
 
     while (width > 0) {
@@ -522,7 +522,7 @@ const OCEAN_HEIGHT = 20;
     const max = range.split("-")[1]/100 || 100;
     return rand(min * length, max * length);
   }
-  
+
   return {generate, addHill, addRange, addTrough, addStrait, addPit, smooth, modify};
 
 })));

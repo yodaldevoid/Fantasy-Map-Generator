@@ -43,7 +43,7 @@
 
       if (sorted.length < count * 10) {
         count = Math.floor(sorted.length / 10);
-        if (!count) {console.warn(`There is no populated cells. Cannot generate states`); return burgs;} 
+        if (!count) {console.warn(`There is no populated cells. Cannot generate states`); return burgs;}
         else {console.warn(`Not enought populated cells (${sorted.length}). Will generate only ${count} states`);}
       }
 
@@ -95,7 +95,7 @@
         states.push({i, color: colors[i-1], name, expansionism, capital: i, type, center: b.cell, culture: b.culture});
         cells.burg[b.cell] = i;
       });
-      
+
       console.timeEnd('createStates');
       return states;
     }
@@ -199,7 +199,7 @@
     // capitals
     const capitals = pack.burgs.filter(b => b.capital);
     const capitalIcons = burgIcons.select("#cities");
-    const capitalLabels = burgLabels.select("#cities");   
+    const capitalLabels = burgLabels.select("#cities");
     const capitalSize = capitalIcons.attr("size") || 1;
     const capitalAnchors = anchors.selectAll("#cities");
     const caSize = capitalAnchors.attr("size") || 2;
@@ -211,11 +211,11 @@
     capitalLabels.selectAll("text").data(capitals).enter()
       .append("text").attr("id", d => "burgLabel"+d.i).attr("data-id", d => d.i)
       .attr("x", d => d.x).attr("y", d => d.y).attr("dy", `${capitalSize * -1.5}px`).text(d => d.name);
-      
+
     capitalAnchors.selectAll("use").data(capitals.filter(c => c.port)).enter()
       .append("use").attr("xlink:href", "#icon-anchor").attr("data-id", d => d.i)
       .attr("x", d => rn(d.x - caSize * .47, 2)).attr("y", d => rn(d.y - caSize * .47, 2))
-      .attr("width", caSize).attr("height", caSize); 
+      .attr("width", caSize).attr("height", caSize);
 
     // towns
     const towns = pack.burgs.filter(b => b.capital === false);
@@ -252,7 +252,7 @@
     states.filter(s => s.i && !s.removed).forEach(function(s) {
       cells.state[burgs[s.capital].cell] = s.i;
       const b = cells.biome[cultures[s.culture].center]; // native biome
-      queue.queue({e:s.center, p:0, s:s.i, b}); 
+      queue.queue({e:s.center, p:0, s:s.i, b});
       cost[s.center] = 1;
     });
     const neutral = cells.i.length / 5000 * 2000 * neutralInput.value * statesNeutral.value; // limit cost for state growth
@@ -284,7 +284,7 @@
       });
     }
 
-    //debug.selectAll(".text").data(cost).enter().append("text").attr("x", (d, e) => cells.p[e][0]-1).attr("y", (d, e) => cells.p[e][1]-1).text(d => d ? rn(d) : "").attr("font-size", 2);  
+    //debug.selectAll(".text").data(cost).enter().append("text").attr("x", (d, e) => cells.p[e][0]-1).attr("y", (d, e) => cells.p[e][1]-1).text(d => d ? rn(d) : "").attr("font-size", 2);
     burgs.filter(b => b.i && !b.removed).forEach(b => b.state = cells.state[b.cell]); // assign state to burgs
 
     function getBiomeCost(r, b, biome, type) {
@@ -309,7 +309,7 @@
 
     function getRiverCost(r, i, type) {
       if (type === "River") return r ? 0 : 100; // penalty for river cultures
-      if (!r) return 0; // no penalty for others if there is no river 
+      if (!r) return 0; // no penalty for others if there is no river
       return Math.min(Math.max(cells.fl[i] / 10, 20), 100) // river penalty from 20 to 100 based on flux
     }
 
@@ -369,7 +369,7 @@
 
       function getHull(start, state, maxLake) {
         const queue = [start], hull = new Set();
-  
+
         while (queue.length) {
           const q = queue.pop();
           const nQ = cells.c[q].filter(c => cells.state[c] === state);
@@ -385,7 +385,7 @@
             queue.push(c);
           });
         }
-  
+
         return hull;
       }
 
@@ -411,7 +411,7 @@
         while (queue.length) {
           const next = queue.dequeue(), n = next.e, p = next.p;
           if (n === end) break;
-  
+
           for (const v of c.v[n]) {
             if (v === -1) continue;
             const totalCost = p + (inside[v] ? 1 : 100);
@@ -433,7 +433,7 @@
       }
 
     }
-   
+
     void function drawLabels() {
       const g = labels.select("#states"), t = defs.select("#textPaths");
       const displayed = layerIsOn("toggleLabels");
@@ -549,7 +549,7 @@
       states[s].area += cells.area[i];
       states[s].rural += cells.pop[i];
       if (cells.burg[i]) {
-        states[s].urban += pack.burgs[cells.burg[i]].population; 
+        states[s].urban += pack.burgs[cells.burg[i]].population;
         states[s].burgs++;
       }
     }
@@ -629,7 +629,7 @@
         };
 
         const naval = states[f].type === "Naval" && states[t].type === "Naval" && cells.f[states[f].center] !== cells.f[states[t].center];
-        const neib = naval ? false : states[f].neighbors.has(t); 
+        const neib = naval ? false : states[f].neighbors.has(t);
         const neibOfNeib = naval || neib ? false : [...states[f].neighbors].map(n => [...states[n].neighbors]).join().includes(t);
 
         let status = naval ? rw(navals) : neib ? rw(neibs) : neibOfNeib ? rw(neibsOfNeibs) : rw(far);
@@ -986,8 +986,8 @@
     console.timeEnd("generateProvinces");
   }
 
-  return {generate, expandStates, normalizeStates, assignColors, 
-    drawBurgs, specifyBurgs, drawStateLabels, collectStatistics, 
+  return {generate, expandStates, normalizeStates, assignColors,
+    drawBurgs, specifyBurgs, drawStateLabels, collectStatistics,
     generateDiplomacy, defineStateForms, getFullName, generateProvinces};
 
 })));

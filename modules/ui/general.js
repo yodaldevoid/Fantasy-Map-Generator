@@ -170,7 +170,7 @@ function getFriendlyPrecipitation(i) {
 // get user-friendly (real-world) population value from map data
 function getFriendlyPopulation(i) {
   const rural = pack.cells.pop[i] * populationRate.value;
-  const urban = pack.cells.burg[i] ? pack.burgs[pack.cells.burg[i]].population * populationRate.value * urbanization.value : 0;  
+  const urban = pack.cells.burg[i] ? pack.burgs[pack.cells.burg[i]].population * populationRate.value * urbanization.value : 0;
   return si(rural+urban);
 }
 
@@ -181,7 +181,7 @@ document.querySelectorAll("[data-locked]").forEach(function(e) {
     else tip("Click to lock the option and always use the current value on new map generation");
     event.stopPropagation();
   });
-  
+
   e.addEventListener("click", function(event) {
     const id = (this.id).slice(5);
     if (this.className === "icon-lock") unlock(id);

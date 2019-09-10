@@ -29,7 +29,7 @@ function editProvinces() {
   document.getElementById("provincesManuallyApply").addEventListener("click", applyProvincesManualAssignent);
   document.getElementById("provincesManuallyCancel").addEventListener("click", () => exitProvincesManualAssignment());
   document.getElementById("provincesAdd").addEventListener("click", enterAddProvinceMode);
-  
+
   body.addEventListener("click", function(ev) {
     if (customization) return;
     const el = ev.target, cl = el.classList, line = el.parentNode, p = +line.dataset.id;
@@ -244,8 +244,8 @@ function editProvinces() {
   }
 
   function regenerateForm(p, line) {
-    const forms = ["County", "Earldom", "Shire", "Landgrave", 'Margrave', "Barony", "Province", 
-      "Department", "Governorate", "State", "Canton", "Prefecture", "Parish", "Deanery", 
+    const forms = ["County", "Earldom", "Shire", "Landgrave", 'Margrave', "Barony", "Province",
+      "Department", "Governorate", "State", "Canton", "Prefecture", "Parish", "Deanery",
       "Council", "District", "Republic", "Territory", "Land", "Region"];
     changeForm(p, line, ra(forms));
   }
@@ -358,7 +358,7 @@ function editProvinces() {
       if (i === pack.provinces[provinceOld].center) {
         const center = centers.select("polygon[data-center='"+i+"']");
         if (!center.size()) centers.append("polygon").attr("data-center", i).attr("points", getPackPolygon(i));
-        tip("Province center cannot be assigned to a different region. Please remove the province first", false, "error"); 
+        tip("Province center cannot be assigned to a different region. Please remove the province first", false, "error");
         return;
       }
 

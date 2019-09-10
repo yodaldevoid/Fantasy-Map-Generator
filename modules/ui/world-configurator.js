@@ -2,10 +2,10 @@ function editWorld() {
   if (customization) return;
   $("#worldConfigurator").dialog({title: "Configure World", resizable: false, width: 460,
     buttons: {
-      "Whole World": () => applyPreset(100, 50), 
-      "Northern": () => applyPreset(33, 25), 
-      "Tropical": () => applyPreset(33, 50), 
-      "Southern": () => applyPreset(33, 75), 
+      "Whole World": () => applyPreset(100, 50),
+      "Northern": () => applyPreset(33, 25),
+      "Tropical": () => applyPreset(33, 50),
+      "Southern": () => applyPreset(33, 75),
       "Restore Winds": restoreDefaultWinds
     }, open: function() {
       const buttons = $(this).dialog("widget").find(".ui-dialog-buttonset > button")
@@ -113,7 +113,7 @@ function editWorld() {
     const mapTiers = d3.range(mapCoordinates.latN, mapCoordinates.latS, -30).map(c => (90-c) / 30 | 0);
     if (mapTiers.includes(tier)) updateWorld();
   }
-  
+
   function restoreDefaultWinds() {
     const defaultWinds = [225, 45, 225, 315, 135, 315];
     const mapTiers = d3.range(mapCoordinates.latN, mapCoordinates.latS, -30).map(c => (90-c) / 30 | 0);

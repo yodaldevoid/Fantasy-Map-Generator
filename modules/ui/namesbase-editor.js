@@ -108,7 +108,7 @@ function editNamesbase() {
     const base = +document.getElementById("namesbaseSelect").value;
     nameBases[base].m = +this.value;
   }
-  
+
   function namesbaseAdd() {
     const base = nameBases.length;
     nameBases.push({name: "Base" + base, min: 5, max: 12, d: "", m: 0});
@@ -137,9 +137,9 @@ function editNamesbase() {
         },
         Cancel: function() {$(this).dialog("close");}
       }
-    });  
+    });
   }
-  
+
   function namesbaseDownload() {
     const data = nameBases.map((b,i) => `${b.name}|${b.min}|${b.max}|${b.d}|${b.m}|${nameBase[i]}`);
     const dataBlob = new Blob([data.join("\r\n")], {type:"text/plain"});
@@ -172,6 +172,6 @@ function editNamesbase() {
       Names.updateChains();
     };
 
-    fileReader.readAsText(fileToLoad, "UTF-8");    
-  } 
+    fileReader.readAsText(fileToLoad, "UTF-8");
+  }
 }

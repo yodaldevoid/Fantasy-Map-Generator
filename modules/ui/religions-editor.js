@@ -68,7 +68,7 @@ function editReligions() {
       totalPopulation += population;
 
       if (r.i) {
-        lines += `<div class="states religions" data-id=${r.i} data-name="${r.name}" data-color="${r.color}" data-area=${area} 
+        lines += `<div class="states religions" data-id=${r.i} data-name="${r.name}" data-color="${r.color}" data-area=${area}
           data-population=${population} data-type=${r.type} data-form=${r.form} data-deity="${r.deity?r.deity:''}" data-expansionism=${r.expansionism}>
           <svg data-tip="Religion fill style. Click to change" width="9" height="9" style="margin-bottom:-1px"><rect x="0" y="0" width="9" height="9" fill="${r.color}" class="zoneFill"></svg>
           <input data-tip="Religion name. Click and type to change" class="religionName" value="${r.name}" autocorrect="off" spellcheck="false">
@@ -303,7 +303,7 @@ function editReligions() {
     body.querySelector("div.selected").classList.remove("selected");
     body.querySelector("div[data-id='"+religion+"']").classList.add("selected");
   }
-  
+
   function dragReligionBrush() {
     const r = +religionsManuallyBrushNumber.value;
 
@@ -311,7 +311,7 @@ function editReligions() {
       if (!d3.event.dx && !d3.event.dy) return;
       const p = d3.mouse(this);
       moveCircle(p[0], p[1], r);
-  
+
       const found = r > 5 ? findAll(p[0], p[1], r) : [findCell(p[0], p[1], r)];
       const selection = found.filter(isLand);
       if (selection) changeReligionForSelection(selection);
@@ -357,7 +357,7 @@ function editReligions() {
     }
     exitReligionsManualAssignment();
   }
- 
+
   function exitReligionsManualAssignment(close) {
     customization = 0;
     relig.select("#temp").remove();
@@ -432,7 +432,7 @@ function editReligions() {
     link.click();
     window.setTimeout(function() {window.URL.revokeObjectURL(url);}, 2000);
   }
-  
+
   function closeReligionsEditor() {
     debug.select("#religionCenters").remove();
     exitReligionsManualAssignment("close");

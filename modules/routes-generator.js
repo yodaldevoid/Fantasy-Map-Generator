@@ -113,7 +113,7 @@
 
     // main routes
     roads.selectAll("path").data(main).enter().append("path")
-      .attr("id", (d, i) => "road" + i) 
+      .attr("id", (d, i) => "road" + i)
       .attr("d", d => round(lineGen(d.map(c => {
         const b = cells.burg[c];
         const x = b ? burgs[b].x : cells.p[c][0];
@@ -123,7 +123,7 @@
 
     // small routes
     trails.selectAll("path").data(small).enter().append("path")
-      .attr("id", (d, i) => "trail" + i) 
+      .attr("id", (d, i) => "trail" + i)
       .attr("d", d => round(lineGen(d.map(c => {
         const b = cells.burg[c];
         const x = b ? burgs[b].x : cells.p[c][0];
@@ -134,7 +134,7 @@
     // ocean routes
     lineGen.curve(d3.curveBundle.beta(1));
     searoutes.selectAll("path").data(ocean).enter().append("path")
-      .attr("id", (d, i) => "searoute" + i) 
+      .attr("id", (d, i) => "searoute" + i)
       .attr("d", d => round(lineGen(d.map(c => {
         const b = cells.burg[c];
         const x = b ? burgs[b].x : cells.p[c][0];

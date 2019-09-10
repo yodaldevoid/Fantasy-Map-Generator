@@ -4,11 +4,11 @@
 function editHeightmap() {
   void function selectEditMode() {
     alertMessage.innerHTML = `<p>Heightmap is a core element on which all other data (rivers, burgs, states etc) is based.
-    So the best edit approach is to <i>erase</i> the secondary data and let the system automatically regenerate it on edit completion.</p> 
+    So the best edit approach is to <i>erase</i> the secondary data and let the system automatically regenerate it on edit completion.</p>
 
     <p>You can also <i>keep</i> all the data, but you won't be able to change the coastline.</p>
 
-    <p>If you need to change the coastline and keep the data, you may try the <i>risk</i> edit option. 
+    <p>If you need to change the coastline and keep the data, you may try the <i>risk</i> edit option.
     The data will be restored as much as possible, but the coastline change can cause unexpected fluctuations and errors.</p>
 
     <p>Check out <a href="https://github.com/Azgaar/Fantasy-Map-Generator/wiki/Heightmap-customization" target="_blank">wiki</a> for guidance.</p>`;
@@ -279,7 +279,7 @@ function getHeight(h) {
         pack.cells.r[i] = r[g];
         pack.cells.conf[i] = conf[g];
         pack.cells.fl[i] = fl[g];
-        if (land && !biome[g]) pack.cells.biome[i] = getBiomeId(grid.cells.prec[g], grid.cells.temp[g]); else 
+        if (land && !biome[g]) pack.cells.biome[i] = getBiomeId(grid.cells.prec[g], grid.cells.temp[g]); else
         if (!land && biome[g]) pack.cells.biome[i] = 0; else
         pack.cells.biome[i] = biome[g];
       }
@@ -311,7 +311,7 @@ function getHeight(h) {
         const state = p.state;
         const stateProvs = pack.states[state].provinces;
         if (stateProvs.includes(p.i)) pack.states[state].provinces.splice(stateProvs.indexOf(p), 1);
-  
+
         p.removed = true;
         continue;
       }
@@ -375,7 +375,7 @@ function getHeight(h) {
   function updateStatistics() {
     const landCells = grid.cells.h.reduce((s, h) => h >= OCEAN_HEIGHT ? s+1 : s);
     landmassCounter.innerHTML = `${landCells} (${rn(landCells/grid.cells.i.length*100)}%)`;
-    landmassAverage.innerHTML = rn(d3.mean(grid.cells.h));    
+    landmassAverage.innerHTML = rn(d3.mean(grid.cells.h));
   }
 
   function updateHistory(noStat) {
@@ -401,7 +401,7 @@ function getHeight(h) {
     grid.cells.h = edits[edits.n - 1].slice();
     mockHeightmap();
     updateStatistics();
-    
+
     if (document.getElementById("preview")) drawHeightmapPreview(); // update heightmap preview if opened
     if ($("#perspectivePanel").is(":visible")) drawPerspective(); // update perspective view if opened
   }
@@ -429,15 +429,15 @@ function getHeight(h) {
     document.getElementById("brushesButtons").addEventListener("click", e => toggleBrushMode(e));
     document.getElementById("changeOnlyLand").addEventListener("click", e => changeOnlyLandClick(e));
     document.getElementById("undo").addEventListener("click", () => restoreHistory(edits.n-1));
-    document.getElementById("redo").addEventListener("click", () => restoreHistory(edits.n+1));  
+    document.getElementById("redo").addEventListener("click", () => restoreHistory(edits.n+1));
     document.getElementById("rescaleShow").addEventListener("click", () => {
       document.getElementById("modifyButtons").style.display = "none";
-      document.getElementById("rescaleSection").style.display = "block";    
+      document.getElementById("rescaleSection").style.display = "block";
     });
     document.getElementById("rescaleHide").addEventListener("click", () => {
       document.getElementById("modifyButtons").style.display = "block";
-      document.getElementById("rescaleSection").style.display = "none";    
-    }); 
+      document.getElementById("rescaleSection").style.display = "none";
+    });
     document.getElementById("rescaler").addEventListener("change", (e) => rescale(e.target.valueAsNumber));
     document.getElementById("rescaleCondShow").addEventListener("click", () => {
       document.getElementById("modifyButtons").style.display = "none";
@@ -451,7 +451,7 @@ function getHeight(h) {
     document.getElementById("smoothHeights").addEventListener("click", smoothAllHeights);
     document.getElementById("disruptHeights").addEventListener("click", disruptAllHeights);
     document.getElementById("brushClear").addEventListener("click", startFromScratch);
-    
+
     function exitBrushMode() {
       const pressed = document.querySelector("#brushesButtons > button.pressed");
       if (!pressed) return;
@@ -533,7 +533,7 @@ function getHeight(h) {
       if (operator === "add") HeightmapGenerator.modify(range, operand, 1, 0); else
       if (operator === "subtract") HeightmapGenerator.modify(range, -1 * operand, 1, 0); else
       if (operator === "exponent") HeightmapGenerator.modify(range, 0, 1, operand);
-      
+
       updateHeightmap();
     }
 
@@ -546,7 +546,7 @@ function getHeight(h) {
       grid.cells.h = grid.cells.h.map(h => h < 17 ? h : lim(h + 2 - Math.random()*4));
       updateHeightmap();
     }
-  
+
     function startFromScratch() {
       if (changeOnlyLand.checked) {tip("Not allowed when 'Change only land cells' mode is set", false, "error"); return;}
       const someHeights = grid.cells.h.some(h => h);
@@ -555,7 +555,7 @@ function getHeight(h) {
       terrs.selectAll("*").remove();
       updateHistory();
     }
-    
+
   }
 
   function openTemplateEditor() {
@@ -569,7 +569,7 @@ function getHeight(h) {
 
     if (modules.openTemplateEditor) return;
     modules.openTemplateEditor = true;
-    
+
     $("#templateBody").sortable({items: "div", handle: ".icon-resize-vertical", containment: "parent", axis: "y"});
 
     // add listeners
@@ -608,7 +608,7 @@ function getHeight(h) {
     }
 
     function addStep(type, count, dist, arg4, arg5) {
-      const body = document.getElementById("templateBody"); 
+      const body = document.getElementById("templateBody");
       body.insertAdjacentHTML("beforeend", getStepHTML(type, count, dist, arg4, arg5));
       const elDist = body.querySelector("div:last-child").querySelector(".templateDist");
       if (elDist) elDist.addEventListener("change", setRange);
@@ -745,7 +745,7 @@ function getHeight(h) {
         addStep("Hill", ".5", "30-50", "25-35", "30-70");
         addStep("Smooth", 1);
         addStep("Multiply", .2, "25-100");
-        addStep("Hill", ".5", "10-20", "50-55", "48-52"); 
+        addStep("Hill", ".5", "10-20", "50-55", "48-52");
       }
 
       else if (template === "templateMediterranean") {
@@ -886,7 +886,7 @@ function getHeight(h) {
           addStep(step[0], step[1], step[2], step[3], step[4]);
         }
       }
-      
+
       fileReader.readAsText(fileToLoad, "UTF-8");
     }
   }
@@ -907,7 +907,7 @@ function getHeight(h) {
     canvas.height = graphHeight;
     document.body.insertBefore(canvas, optionsContainer);
     setOverlayOpacity(0);
-    
+
     document.getElementById("convertImageLoad").classList.add("glow"); // add glow effect
     tip('Image Converter is opened. Upload the image and assign the colors to desired heights', true, "warn"); // main tip
 
@@ -1039,7 +1039,7 @@ function getHeight(h) {
       selectedColor.setAttribute("data-height", height);
 
       terrs.selectAll(".selectedCell").each(function() {
-        this.setAttribute("fill", rgb); 
+        this.setAttribute("fill", rgb);
         this.setAttribute("data-height", height);
       });
 
@@ -1068,11 +1068,11 @@ function getHeight(h) {
         el.setAttribute("data-height", heightTo);
         colorsAssigned.appendChild(el);
       });
-      
+
       colorsAssigned.style.display = "block";
       colorsUnassigned.style.display = "none";
     }
-    
+
     function changeConvertColorsNumber(change) {
       const number = Math.max(Math.min(+convertColors.value + change, 255), 3);
       convertColors.value = number;
@@ -1104,7 +1104,7 @@ function getHeight(h) {
       terrs.selectAll("polygon").remove();
       updateHeightmap();
     }
-    
+
   }
 
   function toggleHeightmapPreview() {
@@ -1235,6 +1235,6 @@ function getHeight(h) {
   function projectIsometric(x, y) {
     const scale = 1, yProj = 4;
     return [(x - y) * scale, (x + y) / yProj * scale];
-  }  
+  }
 
 }

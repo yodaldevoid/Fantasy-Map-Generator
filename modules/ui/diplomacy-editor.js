@@ -95,7 +95,7 @@ function editDiplomacy() {
     const i = d3.interpolateString("0," + l, l + "," + l);
     return t => i(t);
   }
-  
+
   function removePath(path) {
     path.transition().duration(1000).attr("opacity", 0).remove();
   }
@@ -158,7 +158,7 @@ function editDiplomacy() {
     const rel = this.value, oldRel = states[state].diplomacy[sel];
     states[state].diplomacy[sel] = rel;
     this.parentNode.dataset.relations = rel;
-    
+
     const statusTo = rel === "Vassal" ? "Suzerain" : rel === "Suzerain" ? "Vassal" : rel;
     states[sel].diplomacy[state] = statusTo;
 

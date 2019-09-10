@@ -177,7 +177,7 @@ function editUnits() {
     heightExponentInput.value = heightExponentOutput.value = 1.8;
     localStorage.removeItem("heightExponent");
     calculateTemperatures();
-    
+
     // scale bar
     barSizeOutput.value = barSize.value = 2;
     barLabel.value = "";

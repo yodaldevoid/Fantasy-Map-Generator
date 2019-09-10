@@ -239,7 +239,7 @@ function drawScaleBar() {
   else if (val > 9) val = rn(val, -1); // round to 10
   else val = rn(val) // round to 1
   const l = val * scale / dScale; // actual length in pixels on this scale
-  
+
   scaleBar.append("line").attr("x1", 0.5).attr("y1", 0).attr("x2", l+size-0.5).attr("y2", 0).attr("stroke-width", size).attr("stroke", "white");
   scaleBar.append("line").attr("x1", 0).attr("y1", size).attr("x2", l+size).attr("y2", size).attr("stroke-width", size).attr("stroke", "#3d3d3d");
   const dash = size + " " + rn(l / 5 - size, 2);

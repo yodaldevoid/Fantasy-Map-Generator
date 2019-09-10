@@ -82,7 +82,7 @@ function editStates() {
 
       if (!s.i) {
         // Neutral line
-        lines += `<div class="states" data-id=${s.i} data-name="${s.name}" data-cells=${s.cells} data-area=${area} 
+        lines += `<div class="states" data-id=${s.i} data-name="${s.name}" data-cells=${s.cells} data-area=${area}
         data-population=${population} data-burgs=${s.burgs} data-color="" data-form="" data-capital="" data-culture="" data-type="" data-expansionism="">
           <svg width="9" height="9" class="placeholder"></svg>
           <input data-tip="State name. Click and type to change" class="stateName italic" value="${s.name}" autocorrect="off" spellcheck="false">
@@ -153,7 +153,7 @@ function editStates() {
     applySorting(statesHeader);
     $("#statesEditor").dialog({width: fitContent()});
   }
-  
+
   function getCultureOptions(culture) {
     let options = "";
     pack.cultures.slice(1).forEach(c => options += `<option ${c.i === culture ? "selected" : ""} value="${c.i}">${c.name}</option>`);
@@ -188,7 +188,7 @@ function editStates() {
     const i = d3.interpolateString("0," + l, l + "," + l);
     return t => i(t);
   }
-  
+
   function removePath(path) {
     path.transition().duration(1000).attr("opacity", 0).remove();
   }
@@ -577,8 +577,8 @@ function editStates() {
       const center = burgCell ? burgCell : provCells[0];
       const burg = burgCell ? cells.burg[burgCell] : 0;
 
-      const name = burgCell && Math.random() < .7 
-        ? getAdjective(pack.burgs[burg].name) 
+      const name = burgCell && Math.random() < .7
+        ? getAdjective(pack.burgs[burg].name)
         : getAdjective(states[state].name) + " " + provinces[initProv].name.split(" ").slice(-1)[0];
       const formName = name.split(" ").length > 1 ? provinces[initProv].formName : rw(form);
       const fullName = name + " " + formName;
@@ -587,7 +587,7 @@ function editStates() {
     }
 
   }
- 
+
   function exitStatesManualAssignment(close) {
     customization = 0;
     statesBody.select("#temp").remove();
@@ -667,7 +667,7 @@ function editStates() {
     body.querySelectorAll("div > input, select, span, svg").forEach(e => e.style.pointerEvents = "all");
     if (statesAdd.classList.contains("pressed")) statesAdd.classList.remove("pressed");
   }
-  
+
   function downloadStatesData() {
     const unit = areaUnit.value === "square" ? distanceUnitInput.value + "2" : areaUnit.value;
     let data = "Id,State,Color,Capital,Culture,Type,Expansionism,Cells,Burgs,Area "+unit+",Population\n"; // headers

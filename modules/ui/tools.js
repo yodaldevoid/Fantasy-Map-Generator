@@ -51,9 +51,9 @@ toolsContent.addEventListener("click", function(event) {
 });
 
 function processFeatureRegeneration(button) {
-  if (button === "regenerateStateLabels") {BurgsAndStates.drawStateLabels(); if (!layerIsOn("toggleLabels")) toggleLabels();} else 
-  if (button === "regenerateReliefIcons") {ReliefIcons(); if (!layerIsOn("toggleRelief")) toggleRelief();} else 
-  if (button === "regenerateRoutes") {Routes.regenerate(); if (!layerIsOn("toggleRoutes")) toggleRoutes();} else 
+  if (button === "regenerateStateLabels") {BurgsAndStates.drawStateLabels(); if (!layerIsOn("toggleLabels")) toggleLabels();} else
+  if (button === "regenerateReliefIcons") {ReliefIcons(); if (!layerIsOn("toggleRelief")) toggleRelief();} else
+  if (button === "regenerateRoutes") {Routes.regenerate(); if (!layerIsOn("toggleRoutes")) toggleRoutes();} else
   if (button === "regenerateRivers") regenerateRivers(); else
   if (button === "regeneratePopulation") recalculatePopulation(); else
   if (button === "regenerateBurgs") regenerateBurgs(); else

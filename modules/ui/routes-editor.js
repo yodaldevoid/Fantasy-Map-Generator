@@ -48,7 +48,7 @@ function editRoute(onClick) {
     for (let i=0; i <= l; i += increment) {addControlPoint(node.getPointAtLength(i));}
     routeLength.innerHTML = rn(l * distanceScaleInput.value) + " " + distanceUnitInput.value;
   }
-  
+
   function addControlPoint(point) {
     debug.select("#controlPoints").append("circle")
       .attr("cx", point.x).attr("cy", point.y).attr("r", .8)
@@ -82,7 +82,7 @@ function editRoute(onClick) {
 
     redrawRoute();
   }
-  
+
   function dragControlPoint() {
     this.setAttribute("cx", d3.event.x);
     this.setAttribute("cy", d3.event.y);
@@ -98,7 +98,7 @@ function editRoute(onClick) {
 
     elSelected.attr("d", round(lineGen(points)));
     const l = elSelected.node().getTotalLength();
-    routeLength.innerHTML = rn(l * distanceScaleInput.value) + " " + distanceUnitInput.value;    
+    routeLength.innerHTML = rn(l * distanceScaleInput.value) + " " + distanceUnitInput.value;
   }
 
   function showGroupSection() {
@@ -111,7 +111,7 @@ function editRoute(onClick) {
     document.getElementById("routeGroupsSelection").style.display = "none";
     document.getElementById("routeGroupName").style.display = "none";
     document.getElementById("routeGroupName").value = "";
-    document.getElementById("routeGroup").style.display = "inline-block"; 
+    document.getElementById("routeGroup").style.display = "inline-block";
   }
 
   function selectRouteGroup(node) {
@@ -123,11 +123,11 @@ function editRoute(onClick) {
       select.options.add(new Option(this.id, this.id, false, this.id === group));
     });
   }
-  
+
   function changeRouteGroup() {
     document.getElementById(this.value).appendChild(elSelected.node());
   }
-  
+
   function toggleNewGroupInput() {
     if (routeGroupName.style.display === "none") {
       routeGroupName.style.display = "inline-block";
@@ -136,9 +136,9 @@ function editRoute(onClick) {
     } else {
       routeGroupName.style.display = "none";
       routeGroup.style.display = "inline-block";
-    }   
+    }
   }
-  
+
   function createNewGroup() {
     if (!this.value) {tip("Please provide a valid group name"); return;}
     let group = this.value.toLowerCase().replace(/ /g, "_").replace(/[^\w\s]/gi, "");
@@ -148,16 +148,16 @@ function editRoute(onClick) {
       tip("Element with this id already exists. Please provide a unique name", false, "error");
       return;
     }
-    
+
     // just rename if only 1 element left
     const oldGroup = elSelected.node().parentNode;
     const basic = ["roads", "trails", "searoutes"].includes(oldGroup.id);
     if (!basic && oldGroup.childElementCount === 1) {
-      document.getElementById("routeGroup").selectedOptions[0].remove();      
+      document.getElementById("routeGroup").selectedOptions[0].remove();
       document.getElementById("routeGroup").options.add(new Option(group, group, false, true));
       oldGroup.id = group;
       toggleNewGroupInput();
-      document.getElementById("routeGroupName").value = "";      
+      document.getElementById("routeGroupName").value = "";
       return;
     }
 
@@ -170,12 +170,12 @@ function editRoute(onClick) {
     toggleNewGroupInput();
     document.getElementById("routeGroupName").value = "";
   }
-  
+
   function removeRouteGroup() {
     const group = elSelected.node().parentNode.id;
     const basic = ["roads", "trails", "searoutes"].includes(group);
     const count = elSelected.node().parentNode.childElementCount;
-    alertMessage.innerHTML = `Are you sure you want to remove 
+    alertMessage.innerHTML = `Are you sure you want to remove
       ${basic ? "all elements in the group" : "the entire route group"}?
       <br><br>Routes to be removed: ${count}`;
     $("#alert").dialog({resizable: false, title: "Remove route group",
@@ -189,7 +189,7 @@ function editRoute(onClick) {
         },
         Cancel: function() {$(this).dialog("close");}
       }
-    });   
+    });
   }
 
   function toggleRouteSplitMode() {
@@ -201,7 +201,7 @@ function editRoute(onClick) {
     if (routeSplit.classList.contains("pressed")) splitRoute(this);
     else {this.remove(); redrawRoute();}
   }
-  
+
   function splitRoute(clicked) {
     lineGen.curve(d3.curveCatmullRom.alpha(.1));
     const group = d3.select(elSelected.node().parentNode);

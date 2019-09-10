@@ -34,7 +34,7 @@ function editLabel() {
   document.getElementById("labelTextShow").addEventListener("click", showTextSection);
   document.getElementById("labelTextHide").addEventListener("click", hideTextSection);
   document.getElementById("labelText").addEventListener("input", changeText);
-  document.getElementById("labelTextRandom").addEventListener("click", generateRandomName); 
+  document.getElementById("labelTextRandom").addEventListener("click", generateRandomName);
 
   document.getElementById("labelSizeShow").addEventListener("click", showSizeSection);
   document.getElementById("labelSizeHide").addEventListener("click", hideSizeSection);
@@ -142,7 +142,7 @@ function editLabel() {
   function dragLabel() {
     const tr = parseTransform(elSelected.attr("transform"));
     const dx = +tr[0] - d3.event.x, dy = +tr[1] - d3.event.y;
-  
+
     d3.event.on("drag", function() {
       const x = d3.event.x, y = d3.event.y;
       const transform = `translate(${(dx+x)},${(dy+y)})`;
@@ -161,7 +161,7 @@ function editLabel() {
     document.getElementById("labelGroupSection").style.display = "none";
     document.getElementById("labelGroupInput").style.display = "none";
     document.getElementById("labelGroupInput").value = "";
-    document.getElementById("labelGroupSelect").style.display = "inline-block"; 
+    document.getElementById("labelGroupSelect").style.display = "inline-block";
   }
 
   function changeGroup() {
@@ -176,7 +176,7 @@ function editLabel() {
     } else {
       labelGroupInput.style.display = "none";
       labelGroupSelect.style.display = "inline-block";
-    }   
+    }
   }
 
   function createNewGroup() {
@@ -214,7 +214,7 @@ function editLabel() {
     const group = elSelected.node().parentNode.id;
     const basic = group === "states" || group === "addedLabels";
     const count = elSelected.node().parentNode.childElementCount;
-    alertMessage.innerHTML = `Are you sure you want to remove 
+    alertMessage.innerHTML = `Are you sure you want to remove
       ${basic ? "all elements in the group" : "the entire label group"}?
       <br><br>Labels to be removed: ${count}`;
     $("#alert").dialog({resizable: false, title: "Remove route group",
@@ -233,7 +233,7 @@ function editLabel() {
       }
     });
   }
-  
+
   function showTextSection() {
     document.querySelectorAll("#labelEditor > button").forEach(el => el.style.display = "none");
     document.getElementById("labelTextSection").style.display = "inline-block";
@@ -243,7 +243,7 @@ function editLabel() {
     document.querySelectorAll("#labelEditor > button").forEach(el => el.style.display = "inline-block");
     document.getElementById("labelTextSection").style.display = "none";
   }
-  
+
   function changeText() {
     const input = document.getElementById("labelText").value;
     const el = elSelected.select("textPath").node();

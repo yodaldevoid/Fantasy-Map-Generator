@@ -1,7 +1,7 @@
 // UI module stub to control map layers
 "use strict";
 
-// on map regeneration restore layers if they was turned on 
+// on map regeneration restore layers if they was turned on
 function restoreLayers() {
   if (layerIsOn("toggleHeight")) drawHeightmap();
   if (layerIsOn("toggleCells")) drawCells();
@@ -142,7 +142,7 @@ function drawHeightmap() {
   }
 
   let currentLayer = OCEAN_HEIGHT;
-  const heights = cells.i.sort((a, b) => cells.h[a] - cells.h[b]); 
+  const heights = cells.i.sort((a, b) => cells.h[a] - cells.h[b]);
   for (const i of heights) {
     const h = cells.h[i];
     if (h > currentLayer) currentLayer += skip;
@@ -191,7 +191,7 @@ function drawHeightmap() {
     const n = simplification + 1; // filter each nth element
     return chain.filter((d, i) => i % n === 0);
   }
-  
+
   console.timeEnd("drawHeightmap");
 }
 
@@ -228,7 +228,7 @@ function drawTemp() {
   const used = new Uint8Array(n); // to detect already passed cells
   const min = d3.min(cells.temp), max = d3.max(cells.temp);
   const step = Math.max(Math.round(Math.abs(min - max) / 5), 1);
-  const isolines = d3.range(min+step, max, step); 
+  const isolines = d3.range(min+step, max, step);
   const chains = [], labels = []; // store label coordinates
 
   for (const i of cells.i) {
@@ -324,7 +324,7 @@ function drawBiomes() {
   const cells = pack.cells, vertices = pack.vertices, n = cells.i.length;
   const used = new Uint8Array(cells.i.length);
   const paths = new Array(biomesData.i.length).fill("");
-  
+
   for (const i of cells.i) {
     if (!cells.biome[i]) continue; // no need to mark water
     if (used[i]) continue; // already marked
@@ -387,7 +387,7 @@ function drawPrec() {
   const data = cells.i.filter(i => cells.h[i] >= OCEAN_HEIGHT && cells.prec[i]);
   prec.selectAll("circle").data(data).enter().append("circle")
     .attr("cx", d => p[d][0]).attr("cy", d => p[d][1]).attr("r", 0)
-    .transition(show).attr("r", d => rn(Math.max(Math.sqrt(cells.prec[d] * .5), .8),2)); 
+    .transition(show).attr("r", d => rn(Math.max(Math.sqrt(cells.prec[d] * .5), .8),2));
 }
 
 function togglePopulation() {
@@ -451,7 +451,7 @@ function toggleCultures() {
 
 function drawCultures() {
   console.time("drawCultures");
-  
+
   cults.selectAll("path").remove();
   const cells = pack.cells, vertices = pack.vertices, cultures = pack.cultures, n = cells.i.length;
   const used = new Uint8Array(cells.i.length);
@@ -695,7 +695,7 @@ function drawBorders() {
     for (let i=0; i < 1000; i++) {
       if (i === 999) console.error("Find starting vertex: limit is reached", current, f, t);
       const p = chain[chain.length-2] || -1; // previous vertex
-      const v = vertices.v[current], c = vertices.c[current]; 
+      const v = vertices.v[current], c = vertices.c[current];
 
       const v0 = checkCell(c[0]) !== checkCell(c[1]) && checkVertex(v[0]);
       const v1 = checkCell(c[1]) !== checkCell(c[2]) && checkVertex(v[1]);
@@ -741,7 +741,7 @@ function toggleBorders() {
   } else {
     turnButtonOff("toggleBorders");
     $('#borders').fadeOut();
-  }  
+  }
 }
 
 function toggleProvinces() {
@@ -881,7 +881,7 @@ function drawGrid() {
       x0 = x1, y0 = y1;
       return [rn(dx, 2), rn(dy, 2)];
     });
-  }  
+  }
 
   console.timeEnd("drawGrid");
 }
@@ -1026,7 +1026,7 @@ function toggleIcons() {
   } else {
     turnButtonOff("toggleIcons");
     $('#icons').fadeOut();
-  }  
+  }
 }
 
 function toggleRulers() {
@@ -1056,7 +1056,7 @@ function toggleZones() {
   } else {
     turnButtonOff("toggleZones");
     $('#zones').fadeOut();
-  }  
+  }
 }
 
 function layerIsOn(el) {
