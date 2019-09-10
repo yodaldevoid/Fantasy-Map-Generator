@@ -162,12 +162,12 @@ function* poissonDiscSampler(x0, y0, x1, y1, r, k = 3) {
 
 // filter land cells
 function isLand(i) {
-  return pack.cells.h[i] >= 20;
+  return pack.cells.h[i] >= OCEAN_HEIGHT;
 }
 
 // filter water cells
 function isWater(i) {
-  return pack.cells.h[i] < 20;
+  return pack.cells.h[i] < OCEAN_HEIGHT;
 }
 
 // sort cells by height: highest go first

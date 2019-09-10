@@ -79,7 +79,7 @@ function showMapTooltip(point, e, i, g) {
   if (!path[path.length - 8]) return;
   const group = path[path.length - 7].id;
   const subgroup = path[path.length - 8].id;
-  const land = pack.cells.h[i] >= 20;
+  const land = pack.cells.h[i] >= OCEAN_HEIGHT;
 
   // specific elements
   if (group === "rivers") {tip("Click to edit the River"); return;}
@@ -128,11 +128,11 @@ function updateCellInfo(point, i, g) {
   infoCell.innerHTML = i;
   const unit = areaUnit.value === "square" ? " " + distanceUnitInput.value + "²" : " " + areaUnit.value;
   infoArea.innerHTML = cells.area[i] ? si(cells.area[i] * distanceScaleInput.value ** 2) + unit : "n/a";
-  const h = pack.cells.h[i] < 20 ? grid.cells.h[pack.cells.g[i]] : pack.cells.h[i];
+  const h = pack.cells.h[i] < OCEAN_HEIGHT ? grid.cells.h[pack.cells.g[i]] : pack.cells.h[i];
   infoHeight.innerHTML = getFriendlyHeight(point) + " (" + h + ")";
   infoTemp.innerHTML = convertTemperature(grid.cells.temp[g]);
-  infoPrec.innerHTML = cells.h[i] >= 20 ? getFriendlyPrecipitation(i) : "n/a";
-  infoState.innerHTML = cells.h[i] >= 20 ? cells.state[i] ? `${pack.states[cells.state[i]].fullName} (${cells.state[i]})` : "neutral lands (0)" : "no";
+  infoPrec.innerHTML = cells.h[i] >= OCEAN_HEIGHT ? getFriendlyPrecipitation(i) : "n/a";
+  infoState.innerHTML = cells.h[i] >= OCEAN_HEIGHT ? cells.state[i] ? `${pack.states[cells.state[i]].fullName} (${cells.state[i]})` : "neutral lands (0)" : "no";
   infoProvince.innerHTML = cells.province[i] ? `${pack.provinces[cells.province[i]].fullName} (${cells.province[i]})` : "no";
   infoCulture.innerHTML = cells.culture[i] ? `${pack.cultures[cells.culture[i]].name} (${cells.culture[i]})` : "no";
   infoReligion.innerHTML = cells.religion[i] ? `${pack.religions[cells.religion[i]].name} (${cells.religion[i]})` : "no";
@@ -152,11 +152,11 @@ function getFriendlyHeight(p) {
 
   const packH = pack.cells.h[findCell(p[0], p[1])];
   const gridH = grid.cells.h[findGridCell(p[0], p[1])];
-  const h = packH < 20 ? gridH : packH;
+  const h = packH < OCEAN_HEIGHT ? gridH : packH;
 
   let height = -990;
-  if (h >= 20) height = Math.pow(h - 18, +heightExponentInput.value);
-  else if (h < 20 && h > 0) height = (h - 20) / h * 50;
+  if (h >= OCEAN_HEIGHT) height = Math.pow(h - 18, +heightExponentInput.value);
+  else if (h < OCEAN_HEIGHT && h > 0) height = (h - OCEAN_HEIGHT) / h * 50;
 
   return rn(height * unitRatio) + " " + unit;
 }

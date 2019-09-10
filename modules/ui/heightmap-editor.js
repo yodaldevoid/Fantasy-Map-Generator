@@ -99,8 +99,8 @@ function getHeight(h) {
   else if (unit === "f") unitRatio = 0.5468; // if fathom
 
   let height = -990;
-  if (h >= 20) height = Math.pow(h - 18, +heightExponentInput.value);
-  else if (h < 20 && h > 0) height = (h - 20) / h * 50;
+  if (h >= OCEAN_HEIGHT) height = Math.pow(h - 18, +heightExponentInput.value);
+  else if (h < OCEAN_HEIGHT && h > 0) height = (h - OCEAN_HEIGHT) / h * 50;
 
   return rn(height * unitRatio) + " " + unit;
 }
@@ -159,7 +159,7 @@ function getHeight(h) {
     if (!change) {
       for (const i of pack.cells.i) {
         const g = pack.cells.g[i];
-        if (pack.cells.h[i] !== grid.cells.h[g] && pack.cells.h[i] >= 20 === grid.cells.h[g] >= 20) pack.cells.h[i] = grid.cells.h[g];
+        if (pack.cells.h[i] !== grid.cells.h[g] && pack.cells.h[i] >= OCEAN_HEIGHT === grid.cells.h[g] >= OCEAN_HEIGHT) pack.cells.h[i] = grid.cells.h[g];
       }
     }
 
@@ -228,7 +228,7 @@ function getHeight(h) {
     // do not allow to remove land with burgs
     for (const i of grid.cells.i) {
       if (!burg[i]) continue;
-      if (grid.cells.h[i] < 20) grid.cells.h[i] = 20;
+      if (grid.cells.h[i] < OCEAN_HEIGHT) grid.cells.h[i] = OCEAN_HEIGHT;
     }
 
     // save culture centers x and y to restore center cell id after re-graph
@@ -273,7 +273,7 @@ function getHeight(h) {
 
     for (const i of pack.cells.i) {
       const g = pack.cells.g[i];
-      const land = pack.cells.h[i] >= 20;
+      const land = pack.cells.h[i] >= OCEAN_HEIGHT;
 
       if (!change) {
         pack.cells.r[i] = r[g];
@@ -300,7 +300,7 @@ function getHeight(h) {
       b.cell = findCell(b.x, b.y);
       b.feature = pack.cells.f[b.cell];
       pack.cells.burg[b.cell] = b.i;
-      if (!b.capital && pack.cells.h[b.cell] < 20) removeBurg(b.i);
+      if (!b.capital && pack.cells.h[b.cell] < OCEAN_HEIGHT) removeBurg(b.i);
       if (b.capital) pack.states[b.state].center = b.cell;
     }
 
@@ -343,7 +343,7 @@ function getHeight(h) {
     // check ocean cells are not checged if olny land edit is allowed
     if (changeOnlyLand.checked) {
       for (const i of grid.cells.i) {
-        if (prev[i] < 20 || grid.cells.h[i] < 20) grid.cells.h[i] = prev[i];
+        if (prev[i] < OCEAN_HEIGHT || grid.cells.h[i] < OCEAN_HEIGHT) grid.cells.h[i] = prev[i];
       }
     }
 
@@ -353,7 +353,7 @@ function getHeight(h) {
 
   // draw or update heightmap
   function mockHeightmap() {
-    const data = renderOcean.checked ? grid.cells.i : grid.cells.i.filter(i => grid.cells.h[i] >= 20);
+    const data = renderOcean.checked ? grid.cells.i : grid.cells.i.filter(i => grid.cells.h[i] >= OCEAN_HEIGHT);
     const scheme = getColorScheme();
     terrs.selectAll("polygon").data(data).join("polygon").attr("points", d => getGridPolygon(d))
       .attr("id", d => "cell"+d).attr("fill", d => getColor(grid.cells.h[d], scheme));
@@ -366,14 +366,14 @@ function getHeight(h) {
 
     selection.forEach(function(i) {
       let cell = terrs.select("#cell"+i);
-      if (!ocean && grid.cells.h[i] < 20) {cell.remove(); return;}
+      if (!ocean && grid.cells.h[i] < OCEAN_HEIGHT) {cell.remove(); return;}
       if (!cell.size()) cell = terrs.append("polygon").attr("points", getGridPolygon(i)).attr("id", "cell"+i);
       cell.attr("fill", getColor(grid.cells.h[i], scheme));
     });
   }
 
   function updateStatistics() {
-    const landCells = grid.cells.h.reduce((s, h) => h >= 20 ? s+1 : s);
+    const landCells = grid.cells.h.reduce((s, h) => h >= OCEAN_HEIGHT ? s+1 : s);
     landmassCounter.innerHTML = `${landCells} (${rn(landCells/grid.cells.i.length*100)}%)`;
     landmassAverage.innerHTML = rn(d3.mean(grid.cells.h));    
   }
@@ -481,7 +481,7 @@ function getHeight(h) {
         if (~~d3.event.sourceEvent.timeStamp % 5 != 0) return; // slow down the edit
 
         const inRadius = findGridAll(p[0], p[1], r);
-        const selection = changeOnlyLand.checked ? inRadius.filter(i => grid.cells.h[i] >= 20) : inRadius;
+        const selection = changeOnlyLand.checked ? inRadius.filter(i => grid.cells.h[i] >= OCEAN_HEIGHT) : inRadius;
         if (selection && selection.length) changeHeightForSelection(selection, start);
       });
 
@@ -492,16 +492,16 @@ function getHeight(h) {
       const power = brushPower.valueAsNumber;
       const interpolate = d3.interpolateRound(power, 1);
       const land = changeOnlyLand.checked;
-      function lim(v) {return Math.max(Math.min(v, 100), land ? 20 : 0);}
+      function lim(v) {return Math.max(Math.min(v, 100), land ? OCEAN_HEIGHT : 0);}
       const h = grid.cells.h;
 
       const brush = document.querySelector("#brushesButtons > button.pressed").id;
-      if (brush === "brushRaise") s.forEach(i => h[i] = h[i] < 20 ? 20 : lim(h[i] + power)); else
+      if (brush === "brushRaise") s.forEach(i => h[i] = h[i] < OCEAN_HEIGHT ? OCEAN_HEIGHT : lim(h[i] + power)); else
       if (brush === "brushElevate") s.forEach((i,d) => h[i] = lim(h[i] + interpolate(d/Math.max(s.length-1, 1)))); else
       if (brush === "brushLower") s.forEach(i => h[i] = lim(h[i] - power)); else
       if (brush === "brushDepress") s.forEach((i,d) => h[i] = lim(h[i] - interpolate(d/Math.max(s.length-1, 1)))); else
       if (brush === "brushAlign") s.forEach(i => h[i] = lim(h[start])); else
-      if (brush === "brushSmooth") s.forEach(i => h[i] = rn((d3.mean(grid.cells.c[i].filter(i => land ? h[i] >= 20 : 1).map(c => h[c])) + h[i]*(10-power)) / (11-power),1)); else
+      if (brush === "brushSmooth") s.forEach(i => h[i] = rn((d3.mean(grid.cells.c[i].filter(i => land ? h[i] >= OCEAN_HEIGHT : 1).map(c => h[c])) + h[i]*(10-power)) / (11-power),1)); else
       if (brush === "brushDisrupt") s.forEach(i => h[i] = h[i] < 17 ? h[i] : lim(h[i] + power/2 - Math.random()*power));
 
       mockHeightmapSelection(s);
@@ -516,7 +516,7 @@ function getHeight(h) {
 
     function rescale(v) {
       const land = changeOnlyLand.checked;
-      grid.cells.h = grid.cells.h.map(h => land && (h < 20 || h+v < 20) ? h : lim(h+v));
+      grid.cells.h = grid.cells.h.map(h => land && (h < OCEAN_HEIGHT || h+v < OCEAN_HEIGHT) ? h : lim(h+v));
       updateHeightmap();
       document.getElementById("rescaler").value = 0;
     }
@@ -1127,7 +1127,7 @@ function getHeight(h) {
     const imageData = ctx.createImageData(grid.cellsX, grid.cellsY);
 
     grid.cells.h.forEach((height, i) => {
-      let h = height < 20 ? Math.max(height / 1.5, 0) : height;
+      let h = height < OCEAN_HEIGHT ? Math.max(height / 1.5, 0) : height;
       const v = h / 100 * 255;
       imageData.data[i*4] = v;
       imageData.data[i*4 + 1] = v;
@@ -1200,7 +1200,7 @@ function getHeight(h) {
       while (j--) {
         const y = j / lineGranularity * height | 0;
         let index = findGridCell(x * wRatio, y * hRatio);
-        let h = grid.cells.h[index] - 20;
+        let h = grid.cells.h[index] - OCEAN_HEIGHT;
         if (h < 1) h = 0;
         canvasPoints.push([x, y, h]);
       }

@@ -232,7 +232,7 @@ function editBurgs() {
   function addBurgOnClick() {
     const point = d3.mouse(this);
     const cell = findCell(point[0], point[1]);
-    if (pack.cells.h[cell] < 20) {tip("You cannot place state into the water. Please click on a land cell", false, "error"); return;}
+    if (pack.cells.h[cell] < OCEAN_HEIGHT) {tip("You cannot place state into the water. Please click on a land cell", false, "error"); return;}
     if (pack.cells.burg[cell]) {tip("There is already a burg in this cell. Please select a free cell", false, "error"); return;}
     addBurg(point); // add new burg
 

@@ -198,9 +198,9 @@
   function getHeightCost(i, h, type) {
     const f = pack.features[cells.f[i]], a = cells.area[i];
     if (type === "Lake" && f.type === "lake") return 10; // no lake crossing penalty for Lake cultures
-    if (type === "Naval" && h < 20) return a * 2; // low sea/lake crossing penalty for Naval cultures
-    if (type === "Nomadic" && h < 20) return a * 50; // giant sea/lake crossing penalty for Nomads
-    if (h < 20) return a * 6; // general sea/lake crossing penalty
+    if (type === "Naval" && h < OCEAN_HEIGHT) return a * 2; // low sea/lake crossing penalty for Naval cultures
+    if (type === "Nomadic" && h < OCEAN_HEIGHT) return a * 50; // giant sea/lake crossing penalty for Nomads
+    if (h < OCEAN_HEIGHT) return a * 6; // general sea/lake crossing penalty
     if (type === "Highland" && h < 44) return 3000; // giant penalty for highlanders on lowlands
     if (type === "Highland" && h < 62) return 200; // giant penalty for highlanders on lowhills
     if (type === "Highland") return 0; // no penalty for highlanders on highlands

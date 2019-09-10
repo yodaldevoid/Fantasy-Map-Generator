@@ -170,7 +170,7 @@
       if (toRoad && cells.road[n]) return [from, n];
 
       for (const c of cells.c[n]) {
-        if (cells.h[c] < 20) continue; // ignore water cells
+        if (cells.h[c] < OCEAN_HEIGHT) continue; // ignore water cells
         const habitedCost = 100 - biomesData.habitability[cells.biome[c]];
         const heightCost = Math.abs(cells.h[c] - cells.h[n]) * 10;
         const cellCoast = basicCost + habitedCost + heightCost;
@@ -235,7 +235,7 @@
       if (toRoute && n !== start && cells.road[n]) return [from, n];
 
       for (const c of cells.c[n]) {
-        if (cells.h[c] >= 20) continue; // ignore land cells
+        if (cells.h[c] >= OCEAN_HEIGHT) continue; // ignore land cells
         const dist2 = (cells.p[c][1] - cells.p[n][1]) ** 2 + (cells.p[c][0] - cells.p[n][0]) ** 2;
         const totalCost = p + (cells.road[c] ? 1 + dist2 / 2 : dist2 + (cells.t[c] ? 1 : 100));
 

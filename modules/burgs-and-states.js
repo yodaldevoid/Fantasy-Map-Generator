@@ -274,7 +274,7 @@
         if (totalCost > neutral) return;
 
         if (!cost[e] || totalCost < cost[e]) {
-          if (cells.h[e] >= 20) cells.state[e] = s; // assign state to cell
+          if (cells.h[e] >= OCEAN_HEIGHT) cells.state[e] = s; // assign state to cell
           cost[e] = totalCost;
           queue.queue({e, p:totalCost, s, b});
           //const points = [cells.p[n][0], cells.p[n][1], (cells.p[n][0]+cells.p[e][0])/2, (cells.p[n][1]+cells.p[e][1])/2, cells.p[e][0], cells.p[e][1]];
@@ -297,9 +297,9 @@
 
     function getHeightCost(f, h, type) {
       if (type === "Lake" && f.type === "lake") return 10; // low lake crossing penalty for Lake cultures
-      if (type === "Naval" && h < 20) return 300; // low sea crossing penalty for Navals
-      if (type === "Nomadic" && h < 20) return 10000; // giant sea crossing penalty for Nomads
-      if (h < 20) return 1000; // general sea crossing penalty
+      if (type === "Naval" && h < OCEAN_HEIGHT) return 300; // low sea crossing penalty for Navals
+      if (type === "Nomadic" && h < OCEAN_HEIGHT) return 10000; // giant sea crossing penalty for Nomads
+      if (h < OCEAN_HEIGHT) return 1000; // general sea crossing penalty
       if (type === "Highland" && h < 62) return 1100; // penalty for highlanders on lowlands
       if (type === "Highland") return 0; // no penalty for highlanders on highlands
       if (h >= 67) return 2200; // general mountains crossing penalty
@@ -328,9 +328,9 @@
     const cells = pack.cells, burgs = pack.burgs;
 
     for (const i of cells.i) {
-      if (cells.h[i] < 20 || cells.burg[i]) continue; // do not overwrite burgs
+      if (cells.h[i] < OCEAN_HEIGHT || cells.burg[i]) continue; // do not overwrite burgs
       if (cells.c[i].some(c => burgs[cells.burg[c]].capital)) continue; // do not overwrite near capital
-      const neibs = cells.c[i].filter(c => cells.h[c] >= 20);
+      const neibs = cells.c[i].filter(c => cells.h[c] >= OCEAN_HEIGHT);
       const adversaries = neibs.filter(c => cells.state[c] !== cells.state[i]);
       if (adversaries.length < 2) continue;
       const buddies = neibs.filter(c => cells.state[c] === cells.state[i]);
@@ -538,11 +538,11 @@
     });
 
     for (const i of cells.i) {
-      if (cells.h[i] < 20) continue;
+      if (cells.h[i] < OCEAN_HEIGHT) continue;
       const s = cells.state[i];
 
       // check for neighboring states
-      cells.c[i].filter(c => cells.h[c] >= 20 && cells.state[c] !== s).forEach(c => states[s].neighbors.add(cells.state[c]));
+      cells.c[i].filter(c => cells.h[c] >= OCEAN_HEIGHT && cells.state[c] !== s).forEach(c => states[s].neighbors.add(cells.state[c]));
 
       // collect stats
       states[s].cells += 1;
@@ -872,10 +872,10 @@
     while (queue.length) {
       const next = queue.dequeue(), n = next.e, p = next.p, province = next.province, state = next.state;
       cells.c[n].forEach(function(e) {
-        const land = cells.h[e] >= 20;
+        const land = cells.h[e] >= OCEAN_HEIGHT;
         if (!land && !cells.t[e]) return; // cannot pass deep ocean
         if (land && cells.state[e] !== state) return;
-        const evevation = cells.h[e] >= 70 ? 100 : cells.h[e] >= 50 ? 30 : cells.h[e] >= 20 ? 10 : 100;
+        const evevation = cells.h[e] >= 70 ? 100 : cells.h[e] >= 50 ? 30 : cells.h[e] >= OCEAN_HEIGHT ? 10 : 100;
         const totalCost = p + evevation;
 
         if (totalCost > max) return;
@@ -927,7 +927,7 @@
 
           cells.c[n].forEach(function(e) {
             if (cells.province[e]) return;
-            const land = cells.h[e] >= 20;
+            const land = cells.h[e] >= OCEAN_HEIGHT;
             if (cells.state[e] && cells.state[e] !== s.i) return;
             const ter = land ? cells.state[e] === s.i ? 3 : 20 : cells.t[e] ? 10 : 30;
             const totalCost = p + ter;
@@ -963,7 +963,7 @@
             const current = queue.pop();
             if (current === to) return true; // way is found
             cells.c[current].forEach(c => {
-              if (used[c] || cells.h[c] < 20 || cells.state[c] !== state) return;
+              if (used[c] || cells.h[c] < OCEAN_HEIGHT || cells.state[c] !== state) return;
               queue.push(c);
               used[c] = 1;
             });

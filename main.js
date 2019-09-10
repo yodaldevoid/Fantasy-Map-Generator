@@ -755,14 +755,14 @@ function markFeatures() {
 
   for (let i=1, queue=[0]; queue[0] !== -1; i++) {
     cells.f[queue[0]] = i; // feature number
-    const land = heights[queue[0]] >= 20;
+    const land = heights[queue[0]] >= OCEAN_HEIGHT;
     let border = false; // true if feature touches map border
 
     while (queue.length) {
       const q = queue.pop();
       if (cells.b[q]) border = true;
       cells.c[q].forEach(function(e) {
-        const eLand = heights[e] >= 20;
+        const eLand = heights[e] >= OCEAN_HEIGHT;
         //if (eLand) cells.t[e] = 2;
         if (land === eLand && cells.f[e] === 0) {
           cells.f[e] = i;
@@ -817,7 +817,7 @@ function openNearSeaLakes() {
     cells.t[treshold] = -1;
     cells.f[treshold] = ocean;
     cells.c[treshold].forEach(function(c) {
-      if (cells.h[c] >= 20) cells.t[c] = 1; // mark as coastline
+      if (cells.h[c] >= OCEAN_HEIGHT) cells.t[c] = 1; // mark as coastline
     });
     features[lake].type = "ocean"; // mark former lake as ocean
     return true;
@@ -860,7 +860,7 @@ function calculateTemperatures() {
 
   // temperature decreases by 6.5 degree C per 1km
   function convertToFriendly(h) {
-    if (h < 20) return 0;
+    if (h < OCEAN_HEIGHT) return 0;
     const exponent = +heightExponentInput.value;
     const height = Math.pow(h - 18, exponent);
     return rn(height / 1000 * 6.5);
@@ -929,8 +929,8 @@ function generatePrecipitation() {
         // no flux on permafrost
         if (cells.temp[current] < -5) continue;
         // water cell
-        if (cells.h[current] < 20) {
-          if (cells.h[current+next] >= 20) {
+        if (cells.h[current] < OCEAN_HEIGHT) {
+          if (cells.h[current+next] >= OCEAN_HEIGHT) {
             cells.prec[current+next] += Math.max(humidity / rand(10, 20), 1); // coastal precipitation
           } else {
             humidity = Math.min(humidity + 5 * modifier, maxPrec); // wind gets more humidity passing water cell
@@ -995,7 +995,7 @@ function reGraph() {
   for (const i of cells.i) {
     const height = cells.h[i];
     const type = cells.t[i];
-    if (height < 20 && type !== -1 && type !== -2) continue; // exclude all deep ocean points
+    if (height < OCEAN_HEIGHT && type !== -1 && type !== -2) continue; // exclude all deep ocean points
     if (type === -2 && (i%4=== 0 || features[cells.f[i]].type === "lake")) continue; // exclude non-coastal lake points
     const x = points[i][0], y = points[i][1];
 
@@ -1046,7 +1046,7 @@ function drawCoastline() {
   lineGen.curve(d3.curveBasisClosed);
 
   for (const i of cells.i) {
-    const startFromEdge = !i && cells.h[i] >= 20;
+    const startFromEdge = !i && cells.h[i] >= OCEAN_HEIGHT;
     if (!startFromEdge && cells.t[i] !== -1 && cells.t[i] !== 1) continue; // non-edge cell
     const f = cells.f[i];
     if (used[f]) continue; // already connected
@@ -1126,7 +1126,7 @@ function reMarkFeatures() {
 
   for (let i=1, queue=[0]; queue[0] !== -1; i++) {
     cells.f[queue[0]] = i; // feature number
-    const land = cells.h[queue[0]] >= 20;
+    const land = cells.h[queue[0]] >= OCEAN_HEIGHT;
     let border = false; // true if feature touches map border
     let cellNumber = 1; // to count cells number in a feature
     const temp = grid.cells.temp[cells.g[queue[0]]]; // first cell temparature
@@ -1135,7 +1135,7 @@ function reMarkFeatures() {
       const q = queue.pop();
       if (cells.b[q]) border = true;
       cells.c[q].forEach(function(e) {
-        const eLand = cells.h[e] >= 20;
+        const eLand = cells.h[e] >= OCEAN_HEIGHT;
         if (land === eLand && cells.f[e] === 0) {
           cells.f[e] = i;
           queue.push(e);
@@ -1178,7 +1178,7 @@ function elevateLakes() {
   for (const i of lakes) {
     //debug.append("circle").attr("cx", cells.p[i][0]).attr("cy", cells.p[i][1]).attr("r", 1).attr("fill", "blue");
     const hs = cells.c[i].filter(isLand).map(c => cells.h[c]);
-    cells.h[i] = Math.max(d3.min(hs) - 5, 20) || 20;
+    cells.h[i] = Math.max(d3.min(hs) - 5, OCEAN_HEIGHT) || OCEAN_HEIGHT;
   }
 
   console.timeEnd('elevateLakes');
@@ -1192,7 +1192,7 @@ function defineBiomes() {
 
   for (const i of cells.i) {
     if (f[cells.f[i]].group === "freshwater") cells.h[i] = 19; // de-elevate lakes
-    if (cells.h[i] < 20) continue; // water cells have biome 0
+    if (cells.h[i] < OCEAN_HEIGHT) continue; // water cells have biome 0
     let moist = grid.cells.prec[cells.g[i]];
     if (cells.r[i]) moist += Math.max(cells.fl[i] / 20, 2);
     const n = cells.c[i].filter(isLand).map(c => grid.cells.prec[cells.g[c]]).concat([moist]);
@@ -1342,7 +1342,7 @@ function addMarkers() {
     const meanFlux = d3.mean(cells.fl.filter(fl => fl));
 
     let bridges = Array.from(cells.i)
-      .filter(i => cells.burg[i] && cells.h[i] >= 20 && cells.r[i] && cells.fl[i] > meanFlux && cells.road[i] > meanRoad)
+      .filter(i => cells.burg[i] && cells.h[i] >= OCEAN_HEIGHT && cells.r[i] && cells.fl[i] > meanFlux && cells.road[i] > meanRoad)
       .sort((a, b) => (cells.road[b] + cells.fl[b] / 10) - (cells.road[a] + cells.fl[a] / 10));
 
     let count = !bridges.length ? 0 : Math.ceil(bridges.length / 12);
@@ -1367,7 +1367,7 @@ function addMarkers() {
 
   void function addInns() {
     const maxRoad = d3.max(cells.road) * .9;
-    let taverns = Array.from(cells.i).filter(i => cells.crossroad[i] && cells.h[i] >= 20 && cells.road[i] > maxRoad);
+    let taverns = Array.from(cells.i).filter(i => cells.crossroad[i] && cells.h[i] >= OCEAN_HEIGHT && cells.road[i] > maxRoad);
     if (!taverns.length) return;
     addMarker("inn", "🍻", 50, 50, 17.5);
 
@@ -1393,8 +1393,8 @@ function addMarkers() {
   }()
 
   void function addLighthouses() {
-    const lands = cells.i.filter(i => cells.harbor[i] > 6 && cells.c[i].some(c => cells.h[c] < 20 && cells.road[c]));
-    const lighthouses = Array.from(lands).map(i => [i, cells.v[i][cells.c[i].findIndex(c => cells.h[c] < 20 && cells.road[c])]]);
+    const lands = cells.i.filter(i => cells.harbor[i] > 6 && cells.c[i].some(c => cells.h[c] < OCEAN_HEIGHT && cells.road[c]));
+    const lighthouses = Array.from(lands).map(i => [i, cells.v[i][cells.c[i].findIndex(c => cells.h[c] < OCEAN_HEIGHT && cells.road[c])]]);
     if (lighthouses.length) addMarker("lighthouse", "🚨", 50, 50, 16);
 
     for (let i=0; i < lighthouses.length && i < 4; i++) {

@@ -59,7 +59,7 @@ function editBiomes() {
     biomesData.urban = Array.from(array);
 
     for (const i of cells.i) {
-      if (cells.h[i] < 20) continue;
+      if (cells.h[i] < OCEAN_HEIGHT) continue;
       const b = cells.biome[i];
       biomesData.cells[b] += 1;
       biomesData.area[b] += cells.area[i];
@@ -102,7 +102,7 @@ function editBiomes() {
 
     // update footer
     biomesFooterBiomes.innerHTML = body.querySelectorAll(":scope > div").length;
-    biomesFooterCells.innerHTML = pack.cells.h.filter(h => h >= 20).length;
+    biomesFooterCells.innerHTML = pack.cells.h.filter(h => h >= OCEAN_HEIGHT).length;
     biomesFooterArea.innerHTML = si(totalArea) + unit;
     biomesFooterPopulation.innerHTML = si(totalPopulation);
     biomesFooterArea.dataset.area = totalArea;
@@ -289,7 +289,7 @@ function editBiomes() {
   function selectBiomeOnMapClick() {
     const point = d3.mouse(this);
     const i = findCell(point[0], point[1]);
-    if (pack.cells.h[i] < 20) {tip("You cannot reassign water via biomes. Please edit the Heightmap to change water", false, "error"); return;}
+    if (pack.cells.h[i] < OCEAN_HEIGHT) {tip("You cannot reassign water via biomes. Please edit the Heightmap to change water", false, "error"); return;}
 
     const assigned = biomes.select("#temp").select("polygon[data-cell='"+i+"']");
     const biome = assigned.size() ? +assigned.attr("data-biome") : pack.cells.biome[i];

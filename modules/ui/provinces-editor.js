@@ -314,7 +314,7 @@ function editProvinces() {
   function selectProvinceOnMapClick() {
     const point = d3.mouse(this);
     const i = findCell(point[0], point[1]);
-    if (pack.cells.h[i] < 20 || !pack.cells.state[i]) return;
+    if (pack.cells.h[i] < OCEAN_HEIGHT || !pack.cells.state[i]) return;
 
     const assigned = provs.select("g#temp").select("polygon[data-cell='"+i+"']");
     const province = assigned.size() ? +assigned.attr("data-province") : pack.cells.province[i];
@@ -422,7 +422,7 @@ function editProvinces() {
     const cells = pack.cells, provinces = pack.provinces;
     const point = d3.mouse(this);
     const center = findCell(point[0], point[1]);
-    if (cells.h[center] < 20) {tip("You cannot place province into the water. Please click on a land cell", false, "error"); return;}
+    if (cells.h[center] < OCEAN_HEIGHT) {tip("You cannot place province into the water. Please click on a land cell", false, "error"); return;}
     const oldProvince = cells.province[center];
     if (oldProvince && provinces[oldProvince].center === center) {tip("The cell is already a center of a different province. Select other cell", false, "error"); return;}
     const state = cells.state[center];
@@ -443,7 +443,7 @@ function editProvinces() {
 
     cells.province[center] = province;
     cells.c[center].forEach(c => {
-      if (cells.h[c] < 20 || cells.state[c] !== state) return;
+      if (cells.h[c] < OCEAN_HEIGHT || cells.state[c] !== state) return;
       if (provinces.find(p => !p.removed && p.center === c)) return;
       cells.province[c] = province;
     });

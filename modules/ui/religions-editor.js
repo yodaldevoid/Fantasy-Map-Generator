@@ -42,7 +42,7 @@ function editReligions() {
     religions.forEach(r => r.area = r.rural = r.urban = 0);
 
     for (const i of cells.i) {
-      if (cells.h[i] < 20) continue;
+      if (cells.h[i] < OCEAN_HEIGHT) continue;
       const r = cells.religion[i];
       religions[r].area += cells.area[i];
       religions[r].rural += cells.pop[i];
@@ -232,7 +232,7 @@ function editReligions() {
     d3.event.on("drag", () => {
       el.attr("cx", d3.event.x).attr("cy", d3.event.y);
       const cell = findCell(d3.event.x, d3.event.y);
-      if (pack.cells.h[cell] < 20) return; // ignore dragging on water
+      if (pack.cells.h[cell] < OCEAN_HEIGHT) return; // ignore dragging on water
       pack.religions[r].center = cell;
     });
   }
@@ -295,7 +295,7 @@ function editReligions() {
   function selectReligionOnMapClick() {
     const point = d3.mouse(this);
     const i = findCell(point[0], point[1]);
-    if (pack.cells.h[i] < 20) return;
+    if (pack.cells.h[i] < OCEAN_HEIGHT) return;
 
     const assigned = relig.select("#temp").select("polygon[data-cell='"+i+"']");
     const religion = assigned.size() ? +assigned.attr("data-religion") : pack.cells.religion[i];
@@ -397,7 +397,7 @@ function editReligions() {
   function addReligion() {
     const point = d3.mouse(this);
     const center = findCell(point[0], point[1]);
-    if (pack.cells.h[center] < 20) {tip("You cannot place religion center into the water. Please click on a land cell", false, "error"); return;}
+    if (pack.cells.h[center] < OCEAN_HEIGHT) {tip("You cannot place religion center into the water. Please click on a land cell", false, "error"); return;}
     const occupied = pack.religions.some(r => !r.removed && r.center === center);
     if (occupied) {tip("This cell is already a religion center. Please select a different cell", false, "error"); return;}
 

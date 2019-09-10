@@ -1,3 +1,5 @@
+const OCEAN_HEIGHT = 20;
+
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
@@ -271,7 +273,7 @@
         const y = getPointInRange(rangeY, graphHeight);
         start = findGridCell(x, y);
         limit++;
-      } while (cells.h[start] < 20 && limit < 50)
+      } while (cells.h[start] < OCEAN_HEIGHT && limit < 50)
 
       const queue = [start];
       while (queue.length) {
@@ -380,7 +382,7 @@
         startY = getPointInRange(rangeY, graphHeight);
         start = findGridCell(startX, startY);
         limit++;
-      } while (cells.h[start] < 20 && limit < 50)
+      } while (cells.h[start] < OCEAN_HEIGHT && limit < 50)
 
       limit = 0;
       do {
@@ -494,14 +496,14 @@
   }
 
   const modify = function(range, add, mult, power) {
-    const min = range === "land" ? 20 : range === "all" ? 0 : +range.split("-")[0];
+    const min = range === "land" ? OCEAN_HEIGHT : range === "all" ? 0 : +range.split("-")[0];
     const max = range === "land" || range === "all" ? 100 : +range.split("-")[1];
     grid.cells.h = grid.cells.h.map(h => h >= min && h <= max ? mod(h) : h);
 
     function mod(v) {
-      if (add) v = min === 20 ? Math.max(v + add, 20) : v + add;
-      if (mult !== 1) v = min === 20 ? (v-20) * mult + 20 : v * mult;
-      if (power) v = min === 20 ? (v-20) ** power + 20 : v ** power;
+      if (add) v = min === OCEAN_HEIGHT ? Math.max(v + add, OCEAN_HEIGHT) : v + add;
+      if (mult !== 1) v = min === OCEAN_HEIGHT ? (v - OCEAN_HEIGHT) * mult + OCEAN_HEIGHT : v * mult;
+      if (power) v = min === OCEAN_HEIGHT ? (v - OCEAN_HEIGHT) ** power + OCEAN_HEIGHT : v ** power;
       return lim(v);
     }
   }

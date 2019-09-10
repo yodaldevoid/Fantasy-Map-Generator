@@ -261,7 +261,7 @@ function editBurg() {
     const id = +elSelected.attr("data-id");
     const burg = pack.burgs[id];
 
-    if (cells.h[cell] < 20) {
+    if (cells.h[cell] < OCEAN_HEIGHT) {
       tip("Cannot place burg into the water! Select a land cell", false, "error");
       return;
     }

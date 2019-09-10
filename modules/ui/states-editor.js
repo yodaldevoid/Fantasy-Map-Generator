@@ -136,7 +136,7 @@ function editStates() {
 
     // update footer
     statesFooterStates.innerHTML = pack.states.filter(s => s.i && !s.removed).length;
-    statesFooterCells.innerHTML = pack.cells.h.filter(h => h >= 20).length;
+    statesFooterCells.innerHTML = pack.cells.h.filter(h => h >= OCEAN_HEIGHT).length;
     statesFooterBurgs.innerHTML = totalBurgs;
     statesFooterArea.innerHTML = si(totalArea) + unit;
     statesFooterPopulation.innerHTML = si(totalPopulation);
@@ -456,7 +456,7 @@ function editStates() {
   function selectStateOnMapClick() {
     const point = d3.mouse(this);
     const i = findCell(point[0], point[1]);
-    if (pack.cells.h[i] < 20) return;
+    if (pack.cells.h[i] < OCEAN_HEIGHT) return;
 
     const assigned = statesBody.select("#temp").select("polygon[data-cell='"+i+"']");
     const state = assigned.size() ? +assigned.attr("data-state") : pack.cells.state[i];
@@ -619,7 +619,7 @@ function editStates() {
   function addState() {
     const point = d3.mouse(this);
     const center = findCell(point[0], point[1]);
-    if (pack.cells.h[center] < 20) {tip("You cannot place state into the water. Please click on a land cell", false, "error"); return;}
+    if (pack.cells.h[center] < OCEAN_HEIGHT) {tip("You cannot place state into the water. Please click on a land cell", false, "error"); return;}
     let burg = pack.cells.burg[center];
     if (burg && pack.burgs[burg].capital) {tip("Existing capital cannot be selected as a new state capital! Select other cell", false, "error"); return;}
     if (!burg) burg = addBurg(point); // add new burg
@@ -645,7 +645,7 @@ function editStates() {
 
     pack.cells.state[center] = pack.states.length;
     pack.cells.c[center].forEach(c => {
-      if (pack.cells.h[c] < 20) return;
+      if (pack.cells.h[c] < OCEAN_HEIGHT) return;
       if (pack.cells.burg[c]) return;
       affected.push(pack.cells.state[c]);
       pack.cells.state[c] = pack.states.length;

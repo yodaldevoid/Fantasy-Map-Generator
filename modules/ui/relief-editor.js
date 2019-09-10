@@ -139,7 +139,7 @@ function editReliefIcon() {
         const cy = p[1] + rad * Math.sin(a);
 
         if (tree.find(cx, cy, spacing)) return; // too close to existing icon
-        if (pack.cells.h[findCell(cx, cy)] < 20) return; // on water cell
+        if (pack.cells.h[findCell(cx, cy)] < OCEAN_HEIGHT) return; // on water cell
 
         const h = rn(size / 2 * (Math.random() * .4 + .8), 2);
         const x = rn(cx-h, 2);

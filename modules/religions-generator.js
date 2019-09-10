@@ -203,13 +203,13 @@
         const stateCost = s !== cells.state[e] ? 10 : 0;
         const biomeCost = cells.road[e] ? 1 : biomesData.cost[cells.biome[e]];
         const populationCost = Math.max(rn(popCost - cells.pop[e]), 0);
-        const heightCost = Math.max(cells.h[e], 20) - 20;
-        const waterCost = cells.h[e] < 20 ? cells.road[e] ? 50 : 1000 : 0;
+        const heightCost = Math.max(cells.h[e], OCEAN_HEIGHT) - OCEAN_HEIGHT;
+        const waterCost = cells.h[e] < OCEAN_HEIGHT ? cells.road[e] ? 50 : 1000 : 0;
         const totalCost = p + (cultureCost + stateCost + biomeCost + populationCost + heightCost + waterCost) / religions[r].expansionism;
         if (totalCost > neutral) return;
 
         if (!cost[e] || totalCost < cost[e]) {
-          if (cells.h[e] >= 20 && cells.culture[e]) cells.religion[e] = r; // assign religion to cell
+          if (cells.h[e] >= OCEAN_HEIGHT && cells.culture[e]) cells.religion[e] = r; // assign religion to cell
           cost[e] = totalCost;
           queue.queue({e, p:totalCost, r, c, s});
         }
@@ -240,14 +240,14 @@
       cells.c[n].forEach(function(e) {
         const religionCost = cells.religion[e] === b ? 0 : 2000;
         const biomeCost = cells.road[e] ? 0 : biomesData.cost[cells.biome[e]];
-        const heightCost = Math.max(cells.h[e], 20) - 20;
-        const waterCost = cells.h[e] < 20 ? cells.road[e] ? 50 : 1000 : 0;
+        const heightCost = Math.max(cells.h[e], OCEAN_HEIGHT) - OCEAN_HEIGHT;
+        const waterCost = cells.h[e] < OCEAN_HEIGHT ? cells.road[e] ? 50 : 1000 : 0;
         const totalCost = p + (religionCost + biomeCost + heightCost + waterCost) / Math.max(religions[r].expansionism, .1);
 
         if (totalCost > neutral) return;
 
         if (!cost[e] || totalCost < cost[e]) {
-          if (cells.h[e] >= 20 && cells.culture[e]) cells.religion[e] = r; // assign religion to cell
+          if (cells.h[e] >= OCEAN_HEIGHT && cells.culture[e]) cells.religion[e] = r; // assign religion to cell
           cost[e] = totalCost;
           queue.queue({e, p:totalCost, r});
         }

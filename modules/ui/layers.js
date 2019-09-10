@@ -141,7 +141,7 @@ function drawHeightmap() {
     default: lineGen.curve(d3.curveBasisClosed);
   }
 
-  let currentLayer = 20;
+  let currentLayer = OCEAN_HEIGHT;
   const heights = cells.i.sort((a, b) => cells.h[a] - cells.h[b]); 
   for (const i of heights) {
     const h = cells.h[i];
@@ -159,7 +159,7 @@ function drawHeightmap() {
   }
 
   terrs.append("rect").attr("x", 0).attr("y", 0).attr("width", "100%").attr("height", "100%").attr("fill", scheme(.8)); // draw base layer
-  for (const i of d3.range(20, 101)) {
+  for (const i of d3.range(OCEAN_HEIGHT, 101)) {
     if (paths[i].length < 10) continue;
     const color = getColor(i, scheme);
     if (terracing) terrs.append("path").attr("d", paths[i]).attr("transform", "translate(.7,1.4)").attr("fill", d3.color(color).darker(terracing)).attr("data-height", i);
@@ -384,7 +384,7 @@ function drawPrec() {
   const show = d3.transition().duration(800).ease(d3.easeSinIn);
   prec.selectAll("text").attr("opacity", 0).transition(show).attr("opacity", 1);
 
-  const data = cells.i.filter(i => cells.h[i] >= 20 && cells.prec[i]);
+  const data = cells.i.filter(i => cells.h[i] >= OCEAN_HEIGHT && cells.prec[i]);
   prec.selectAll("circle").data(data).enter().append("circle")
     .attr("cx", d => p[d][0]).attr("cy", d => p[d][1]).attr("r", 0)
     .transition(show).attr("r", d => rn(Math.max(Math.sqrt(cells.prec[d] * .5), .8),2)); 
@@ -612,9 +612,9 @@ function drawStates() {
   // connect vertices to chain
   function connectVertices(start, t, state) {
     const chain = []; // vertices chain to form a path
-    let land = vertices.c[start].some(c => cells.h[c] >= 20 && cells.state[c] !== t);
-    function check(i) {state = cells.state[i]; land = cells.h[i] >= 20;}
-    
+    let land = vertices.c[start].some(c => cells.h[c] >= OCEAN_HEIGHT && cells.state[c] !== t);
+    function check(i) {state = cells.state[i]; land = cells.h[i] >= OCEAN_HEIGHT;}
+
     for (let i=0, current = start; i === 0 || current !== start && i < 20000; i++) {
       const prev = chain[chain.length - 1] ? chain[chain.length - 1][0] : -1; // previous vertex in chain
       chain.push([current, state, land]); // add current vertex to sequence
@@ -667,13 +667,13 @@ function drawBorders() {
     }
 
     // if cell is on state border
-    const stateToCell = cells.c[i].find(n => cells.h[n] >= 20 && s > cells.state[n] && sUsed[s][n] !== cells.state[n]);
+    const stateToCell = cells.c[i].find(n => cells.h[n] >= OCEAN_HEIGHT && s > cells.state[n] && sUsed[s][n] !== cells.state[n]);
     if (stateToCell !== undefined) {
       const stateTo = cells.state[stateToCell];
       sUsed[s][stateToCell] = stateTo;
-      const vertex = cells.v[i].find(v => vertices.c[v].some(i => cells.h[i] >= 20 && cells.state[i] === stateTo));
+      const vertex = cells.v[i].find(v => vertices.c[v].some(i => cells.h[i] >= OCEAN_HEIGHT && cells.state[i] === stateTo));
       const chain = connectVertices(vertex, s, cells.state, stateTo, sUsed);
-      
+
       if (chain.length > 1) {
         sPath.push("M" + chain.map(c => vertices.p[c]).join(" "));
         i--;
@@ -689,7 +689,7 @@ function drawBorders() {
   function connectVertices(current, f, array, t, used) {
     let chain = [];
     const checkCell = c => c >= n || array[c] !== f;
-    const checkVertex = v => vertices.c[v].some(c => array[c] === f) && vertices.c[v].some(c => array[c] === t && cells.h[c] >= 20);
+    const checkVertex = v => vertices.c[v].some(c => array[c] === f) && vertices.c[v].some(c => array[c] === t && cells.h[c] >= OCEAN_HEIGHT);
 
     // find starting vertex
     for (let i=0; i < 1000; i++) {
@@ -804,8 +804,8 @@ function drawProvinces() {
   // connect vertices to chain
   function connectVertices(start, t, province) {
     const chain = []; // vertices chain to form a path
-    let land = vertices.c[start].some(c => cells.h[c] >= 20 && cells.province[c] !== t);
-    function check(i) {province = cells.province[i]; land = cells.h[i] >= 20;}
+    let land = vertices.c[start].some(c => cells.h[c] >= OCEAN_HEIGHT && cells.province[c] !== t);
+    function check(i) {province = cells.province[i]; land = cells.h[i] >= OCEAN_HEIGHT;}
 
     for (let i=0, current = start; i === 0 || current !== start && i < 20000; i++) {
       const prev = chain[chain.length - 1] ? chain[chain.length - 1][0] : -1; // previous vertex in chain

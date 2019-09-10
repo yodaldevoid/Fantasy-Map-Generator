@@ -271,7 +271,7 @@ function addRiverOnClick() {
   const cells = pack.cells;
   const point = d3.mouse(this);
   let i = findCell(point[0], point[1]);
-  if (cells.r[i] || cells.h[i] < 20 || cells.b[i]) return;
+  if (cells.r[i] || cells.h[i] < OCEAN_HEIGHT || cells.b[i]) return;
 
   const dataRiver = []; // to store river points
   const river = +getNextId("river").slice(5); // river id
@@ -294,7 +294,7 @@ function addRiverOnClick() {
 
     const tx = cells.p[min][0], ty = cells.p[min][1];
 
-    if (cells.h[min] < 20) {
+    if (cells.h[min] < OCEAN_HEIGHT) {
       const px = (x + tx) / 2;
       const py = (y + ty) / 2;
       dataRiver.push({x: px, y: py, cell:i});

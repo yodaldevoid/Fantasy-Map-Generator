@@ -42,7 +42,7 @@ function editCultures() {
     cultures.forEach(c => c.cells = c.area = c.rural = c.urban = 0);
 
     for (const i of cells.i) {
-      if (cells.h[i] < 20) continue;
+      if (cells.h[i] < OCEAN_HEIGHT) continue;
       const c = cells.culture[i];
       cultures[c].cells += 1;
       cultures[c].area += cells.area[i];
@@ -109,7 +109,7 @@ function editCultures() {
 
     // update footer
     culturesFooterCultures.innerHTML = pack.cultures.filter(c => c.i && !c.removed).length;
-    culturesFooterCells.innerHTML = pack.cells.h.filter(h => h >= 20).length;
+    culturesFooterCells.innerHTML = pack.cells.h.filter(h => h >= OCEAN_HEIGHT).length;
     culturesFooterArea.innerHTML = si(totalArea) + unit;
     culturesFooterPopulation.innerHTML = si(totalPopulation);
     culturesFooterArea.dataset.area = totalArea;
@@ -248,7 +248,7 @@ function editCultures() {
     d3.event.on("drag", () => {
       el.attr("cx", d3.event.x).attr("cy", d3.event.y);
       const cell = findCell(d3.event.x, d3.event.y);
-      if (pack.cells.h[cell] < 20) return; // ignore dragging on water
+      if (pack.cells.h[cell] < OCEAN_HEIGHT) return; // ignore dragging on water
       pack.cultures[c].center = cell;
       recalculateCultures();
     });
@@ -325,7 +325,7 @@ function editCultures() {
   function selectCultureOnMapClick() {
     const point = d3.mouse(this);
     const i = findCell(point[0], point[1]);
-    if (pack.cells.h[i] < 20) return;
+    if (pack.cells.h[i] < OCEAN_HEIGHT) return;
 
     const assigned = cults.select("#temp").select("polygon[data-cell='"+i+"']");
     const culture = assigned.size() ? +assigned.attr("data-culture") : pack.cells.culture[i];
@@ -430,7 +430,7 @@ function editCultures() {
   function addCulture() {
     const point = d3.mouse(this);
     const center = findCell(point[0], point[1]);
-    if (pack.cells.h[center] < 20) {tip("You cannot place culture center into the water. Please click on a land cell", false, "error"); return;}
+    if (pack.cells.h[center] < OCEAN_HEIGHT) {tip("You cannot place culture center into the water. Please click on a land cell", false, "error"); return;}
     const occupied = pack.cultures.some(c => !c.removed && c.center === center);
     if (occupied) {tip("This cell is already a culture center. Please select a different cell", false, "error"); return;}
 

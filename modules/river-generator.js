@@ -47,7 +47,7 @@
         }
     
         if (cells.fl[i] < 30) {
-          if (cells.h[min] >= 20) cells.fl[min] += cells.fl[i];
+          if (cells.h[min] >= OCEAN_HEIGHT) cells.fl[min] += cells.fl[i];
           return; // flux is too small to operate as river
         }
     
@@ -66,7 +66,7 @@
         } else cells.r[min] = cells.r[i]; // assign the river to the downhill cell
 
         const nx = p[min][0], ny = p[min][1];
-        if (cells.h[min] < 20) {
+        if (cells.h[min] < OCEAN_HEIGHT) {
           // pour water to the sea haven
           riversData.push({river: cells.r[i], cell: cells.haven[i], x: nx, y: ny});
         } else {
@@ -115,7 +115,7 @@
   const resolveDepressions = function() {
     console.time('resolveDepressions');
     const cells = pack.cells;
-    const land = cells.i.filter(i => cells.h[i] >= 20 && cells.h[i] < 95 && !cells.b[i]); // exclude near-border cells
+    const land = cells.i.filter(i => cells.h[i] >= OCEAN_HEIGHT && cells.h[i] < 95 && !cells.b[i]); // exclude near-border cells
     land.sort(highest); // highest cells go first
     let depressed = false;
 
@@ -133,7 +133,7 @@
     }
 
     console.timeEnd('resolveDepressions');
-    //const depressed = cells.i.filter(i => cells.h[i] >= 20  && cells.h[i] < 95 && !cells.b[i] && cells.h[i] <= d3.min(cells.c[i].map(c => cells.h[c])));
+    //const depressed = cells.i.filter(i => cells.h[i] >= OCEAN_HEIGHT  && cells.h[i] < 95 && !cells.b[i] && cells.h[i] <= d3.min(cells.c[i].map(c => cells.h[c])));
     //debug.selectAll(".deps").data(depressed).enter().append("circle").attr("r", 0.8).attr("cx", d => cells.p[d][0]).attr("cy", d => cells.p[d][1]);
     return depressed;
   }

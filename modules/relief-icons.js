@@ -16,7 +16,7 @@
 
     for (const i of cells.i) {
       const height = cells.h[i];
-      if (height < 20) continue; // no icons on water
+      if (height < OCEAN_HEIGHT) continue; // no icons on water
       if (cells.r[i]) continue; // no icons on rivers 
       const b = cells.biome[i];
       if (height < 50 && biomesData.iconsDensity[b] === 0) continue; // no icons for this biome
