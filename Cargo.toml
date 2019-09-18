@@ -1,0 +1,37 @@
+[package]
+name = "mapgen"
+version = "0.1.0"
+authors = ["Gabriel Smith <ga29smith@gmail.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+console_error_panic_hook = "0.1"
+js-sys = "0.3.27"
+triangulation = "0.2"
+wasm-bindgen = "0.2.50"
+
+[dependencies.rand]
+version = "0.7"
+features = ['wasm-bindgen']
+
+[dependencies.web-sys]
+version = "0.3.27"
+features = [
+    'console',
+    'Document',
+    'Element',
+    'Event',
+    'EventTarget',
+    'Node',
+    'NodeList',
+    'Window',
+]
+
+[patch.crates-io]
+js-sys = { path = "../wasm-bindgen/crates/js-sys" }
+triangulation = { path = "../triangulation" }
+wasm-bindgen = { path = "../wasm-bindgen" }
+web-sys = { path = "../wasm-bindgen/crates/web-sys" }
