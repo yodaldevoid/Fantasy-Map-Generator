@@ -88,4 +88,13 @@ impl Voronoi {
             c.vertices.iter().map(move |v| self.vertices.get(v).expect("No vertices for cell"))
         )
     }
+
+    pub fn get_cell_vertex_coords<'a>(
+        &'a self,
+    ) -> impl Iterator<Item = impl Iterator<Item = Point> + 'a> + 'a {
+        (0..self.center_points)
+            .map(PointIndex::from)
+            .filter_map(move |p| self.get_cell_vertices(p))
+            .map(|i| i.map(|v| v.coords))
+    }
 }

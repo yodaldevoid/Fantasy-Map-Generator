@@ -12,7 +12,7 @@ use rand::{random, SeedableRng};
 use rand::distributions::Distribution;
 use rand::distributions::uniform::Uniform;
 use rand::rngs::StdRng;
-use triangulation::{Delaunay, Point, PointIndex};
+use triangulation::{Delaunay, Point};
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
@@ -204,13 +204,6 @@ impl Grid {
         }
         points
     }
-
-    pub fn cell_vertex_coords<'a>(&'a self) -> impl Iterator<Item = impl Iterator<Item = Point> + 'a> + 'a {
-        (0..self.points.len())
-            .map(PointIndex::from)
-            .filter_map(move |p| self.voronoi.get_cell_vertices(p))
-            .map(|i| i.map(|v| v.coords))
-    }
 }
 
 struct Map {
@@ -234,7 +227,7 @@ impl Map {
         let mut rng = StdRng::seed_from_u64(seed);
 
         let grid = Grid::new(graph_size, density, &mut rng);
-        draw_cells(grid.cell_vertex_coords());
+        draw_cells(grid.voronoi.get_cell_vertex_coords());
 
         // TODO: mark features (ocean, lakes, islands)
         // TODO: open near sea lakes
