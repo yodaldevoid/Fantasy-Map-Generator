@@ -4,6 +4,7 @@ use triangulation::{Delaunay, EdgeIndex, Point, PointIndex};
 use web_sys::console;
 
 pub struct Voronoi {
+    pub center_points: usize,
     pub cells: HashMap<PointIndex, VoronoiCell>,
     pub vertices: HashMap<EdgeIndex, VoronoiVertex>,
 }
@@ -25,6 +26,7 @@ impl Voronoi {
         let dcel = &delaunay.dcel;
 
         let mut voronoi = Voronoi {
+            center_points: num_center_points,
             cells: HashMap::with_capacity(num_center_points),
             vertices: HashMap::with_capacity(points.len()),
         };
