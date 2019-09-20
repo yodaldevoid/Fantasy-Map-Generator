@@ -69,7 +69,11 @@ impl Voronoi {
                         x: point.x.floor(),
                         y: point.y.floor(),
                     },
-                    connected_vertices: dcel.triangle_adjacent_triangles(triangle).collect(),
+                    connected_vertices: dcel
+                        .triangle_edges(triangle)
+                        .iter()
+                        .filter_map(|&e| delaunay.dcel.twin(e))
+                        .collect(),
                     connected_cells: dcel.triangle_points(triangle),
                 };
                 voronoi.vertices.insert(triangle, vertex);
