@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use triangulation::{Delaunay, EdgeIndex, Point, PointIndex};
-use web_sys::console;
 
 pub struct Voronoi {
     pub center_points: usize,
@@ -32,20 +31,20 @@ impl Voronoi {
         };
 
         for edge in (0..dcel.vertices.len()).map(|e| EdgeIndex::from(e)) {
-            // Get the point that this edge points to.
-            let point = dcel.vertices[dcel.next_edge(edge)];
+            // Get the point that this edge points from.
+            let point = dcel.vertices[edge];
             // If this point is not on the boundry and we have not created a
             // voronoi cell for it, create one.
             if point < num_center_points.into() && voronoi.cells.get(&point).is_none() {
-                // Incoming edges to this point.
-                let edges: Vec<_> = dcel.incoming_edges(point).collect();
+                // Outgoing edges from this point.
+                let edges: Vec<_> = dcel.outgoing_edges(point).collect();
                 // The triangles that use this point.
                 let vertices: Vec<_> = edges.iter().map(|&e| dcel.triangle_first_edge(e)).collect();
-                // Start point of the incoming edges. Points kept only if they
+                // End point of the outgoing edges. Points kept only if they
                 // are not on the boundry.
                 let adjacent_cells: Vec<_> = edges
                     .iter()
-                    .map(|&e| dcel.vertices[e])
+                    .map(|&e| dcel.vertices[dcel.next_edge(e)])
                     .filter(|&c| c < num_center_points.into())
                     .collect();
                 // If the number of incoming edges is greater than the number of
