@@ -13,12 +13,16 @@ use rand::distributions::Distribution;
 use rand::distributions::uniform::Uniform;
 use rand::rngs::StdRng;
 use triangulation::{Delaunay, Point};
+use svg::Document;
+use svg::node::element::Path;
+use svg::node::element::path::Data;
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
 use util::FloatExt;
 use voronoi::Voronoi;
 
+/*
 #[wasm_bindgen(module = "/modules/ui-util.js")]
 extern "C" {
     #[wasm_bindgen(js_name = removeLoading)]
@@ -33,6 +37,7 @@ extern "C" {
     #[wasm_bindgen(js_name = clearCells)]
     fn clear_cells();
 }
+*/
 
 #[wasm_bindgen(start)]
 pub fn run() -> Result<(), JsValue> {
@@ -54,11 +59,11 @@ pub fn run() -> Result<(), JsValue> {
 
     // TODO: Load stored options from local storage
     // TODO: get graph/svg size from input field
-    let graph_size = Size::new(1000, 1000);
+    let graph_size = Size::new(100, 100);
 
     // TODO: setup landmass/ocean bases
 
-    remove_loading();
+    //remove_loading();
 
     load_initial_map(graph_size);
 
@@ -104,7 +109,7 @@ fn load_initial_map(graph_size: Size) -> Map {
 fn generate_map_on_load(graph_size: Size, density: NonZeroU32) -> Map {
     // TODO: apply the default style, maybe do before
     // TODO: generate map
-    let map = Map::generate(graph_size, density);
+    let map = Map::generate_with_seed(graph_size, density, 917019374);
     // TODO: focus on the current target, may have been set by href
     // TODO: apply the current (set in local storage) layer preset
     map
@@ -121,8 +126,8 @@ struct Grid {
 
 impl Grid {
     fn new(size: Size, density: NonZeroU32, rng: &mut StdRng) -> Self {
-        console::time_with_label("place_points");
-        let cells_desired = 10_000 * density.get();
+        //console::time_with_label("place_points");
+        let cells_desired = 100 * density.get();
         // Spacing between points before jittering
         let spacing =
             ((size.width * size.height / cells_desired as u32) as f32)
@@ -135,19 +140,19 @@ impl Grid {
         let boundary = Grid::generate_boundary_points(size, spacing);
         // jittered square grid
         let points = Grid::generate_jittered_grid(size, spacing, rng);
-        console::time_end_with_label("place_points");
+        //console::time_end_with_label("place_points");
 
-        console::time_with_label("calculate_delaunay");
+        //console::time_with_label("calculate_delaunay");
         let mut allpoints = Vec::with_capacity(points.len() + boundary.len());
         allpoints.extend_from_slice(&points);
         allpoints.extend_from_slice(&boundary);
         let mut delaunay = Delaunay::new(allpoints.as_slice()).unwrap();
         delaunay.dcel.init_revmap();
-        console::time_end_with_label("calculate_delaunay");
+        //console::time_end_with_label("calculate_delaunay");
 
-        console::time_with_label("calculate_voronoi");
+        //console::time_with_label("calculate_voronoi");
         let voronoi = Voronoi::from_delaunay(&delaunay, &allpoints, points.len());
-        console::time_end_with_label("calculate_voronoi");
+        //console::time_end_with_label("calculate_voronoi");
 
         // TODO: generate heights
         let heights = vec![0; points.len()];
@@ -268,10 +273,25 @@ impl Map {
 }
 
 fn draw_cells<'a>(cell_vertex_coords: impl Iterator<Item = impl Iterator<Item = Point> + 'a> + 'a) {
-    let cell_vertex_coords = cell_vertex_coords.map(|i|
-        JsValue::from(i.map(|p|
-            JsValue::from(Array::of2(&JsValue::from(p.x), &JsValue::from(p.y)))
-        ).collect::<Array>())
-    ).collect::<Array>();
-    __draw_cells(cell_vertex_coords);
+    let mut data = Data::new();
+    for mut cell in cell_vertex_coords {
+        if let Some(vertex) = cell.next() {
+            data = data.move_to((vertex.x, vertex.y));
+            for vertex in cell {
+                data = data.line_to((vertex.x, vertex.y));
+            }
+            data = data.close();
+        }
+    }
+
+    let path = Path::new()
+        .set("fill", "none")
+        .set("stroke", "black")
+        .set("stroke-width", 0.1)
+        .set("d", data);
+
+    let doc = Document::new()
+        .set("background-color", "white")
+        .add(path);
+    svg::save("map.svg", &doc).expect("SVG failed to save");
 }
