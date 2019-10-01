@@ -5,6 +5,7 @@ mod util;
 mod voronoi;
 mod svg_test;
 
+use std::collections::VecDeque;
 use std::iter::successors;
 #[cfg(target_arch = "wasm32")]
 use std::panic;
@@ -175,6 +176,54 @@ fn generate_map_on_load(graph_size: Size, density: NonZeroU32) -> Map {
 
 const DENSITY_STEP: u32 = 10_000;
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum Coast {
+    None,
+    Beach,
+    Shallows,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum FeatureType {
+    Island(IslandGroup),
+    Ocean,
+    Lake(LakeGroup),
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum LakeGroup {
+    Freshwater,
+    Salt,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum IslandGroup {
+    Continent,
+    Island,
+    Isle,
+}
+
+impl std::fmt::Display for FeatureType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            FeatureType::Ocean => write!(f, "ocean"),
+            FeatureType::Lake(LakeGroup::Freshwater) => write!(f, "freshwater"),
+            FeatureType::Lake(LakeGroup::Salt) => write!(f, "salt"),
+            FeatureType::Island(IslandGroup::Continent) => write!(f, "continent"),
+            FeatureType::Island(IslandGroup::Island) => write!(f, "island"),
+            FeatureType::Island(IslandGroup::Isle) => write!(f, "isle"),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Feature {
+    index: usize,
+    land: bool,
+    border: bool,
+    ty: FeatureType,
+}
+
 pub struct Grid {
     pub size: Size,
     pub density: NonZeroU32,
@@ -185,6 +234,10 @@ pub struct Grid {
     pub points: Vec<Point>,
     pub voronoi: Voronoi,
     pub heights: Vec<u8>,
+    // TODO: FeatureIndex?
+    pub feature_map: Vec<Option<usize>>,
+    pub features: Vec<Feature>,
+    pub coasts: Vec<Coast>,
 }
 
 impl Grid {
@@ -218,6 +271,9 @@ impl Grid {
         time_end!("calculate_voronoi");
 
         let heights = vec![0; voronoi.cells.len()];
+        let feature_map = vec![None; voronoi.cells.len()];
+        let features = vec![];
+        let coasts = vec![Coast::None; voronoi.cells.len()];
 
         Grid {
             size,
@@ -229,6 +285,9 @@ impl Grid {
             points,
             voronoi,
             heights,
+            feature_map,
+            features,
+            coasts,
         }
     }
 
@@ -283,6 +342,65 @@ impl Grid {
                 + ((y / self.point_spacing) as u32).min(self.cells_y - 1) * self.cells_x
         ) as usize).into()
     }
+
+    pub fn mark_features(&mut self, rng: &mut StdRng, seed: u64) {
+        time_start!("mark_features");
+
+        *rng = StdRng::seed_from_u64(seed);
+        self.coasts = vec![Coast::None; self.voronoi.cells.len()];
+        self.feature_map = vec![None; self.voronoi.cells.len()];
+        self.features.clear();
+
+        let mut i = 0;
+        let mut queue = VecDeque::new();
+        queue.push_back(0);
+        loop {
+            self.feature_map[queue[0]] = Some(i);
+            let land = self.heights[queue[0]] >= OCEAN_HEIGHT;
+            let mut border = false;
+
+            while !queue.is_empty() {
+                let q = queue.pop_front().unwrap();
+                let cell = &self.voronoi.cells[&q.into()];
+                if cell.border_cell {
+                    border = true;
+                }
+                for a in cell.adjacent_cells.iter() {
+                    let adj_land = self.heights[a.as_usize()] >= OCEAN_HEIGHT;
+                    if land == adj_land && self.feature_map[a.as_usize()].is_none() {
+                        self.feature_map[a.as_usize()] = Some(i);
+                        queue.push_back(a.as_usize());
+                    }
+                    if land && !adj_land {
+                        self.coasts[q] = Coast::Beach;
+                        self.coasts[a.as_usize()] = Coast::Shallows;
+                    }
+                }
+            }
+
+            // TODO: get the right groups
+            let ty = match (land, border) {
+                (true, _) => FeatureType::Island(IslandGroup::Island),
+                (false, true) => FeatureType::Ocean,
+                (false, false) => FeatureType::Lake(LakeGroup::Freshwater),
+            };
+            self.features.push(Feature {
+                index: i,
+                land,
+                border,
+                ty,
+            });
+
+            if let Some((idx, _)) = self.feature_map.iter().enumerate().skip_while(|(_, f)| f.is_some()).next() {
+                queue.push_back(idx);
+                i += 1;
+            } else {
+                break;
+            }
+        }
+
+        time_end!("mark_features");
+    }
 }
 
 struct Map {
@@ -311,7 +429,7 @@ impl Map {
         HeightmapGenerator::generate_with_template(&mut grid, &mut rng, Template::Isthmus);
         time_end!("generate_hightmap");
 
-        // TODO: mark features (ocean, lakes, islands)
+        grid.mark_features(&mut rng, seed);
         // TODO: open near sea lakes
 
         draw_heightmap(&grid);
