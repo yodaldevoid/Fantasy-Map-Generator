@@ -236,7 +236,8 @@ impl Grid {
         let radius = spacing / 2.0;
         // Max deviation
         let jittering = radius * 0.9;
-        let mut jitter = move || Uniform::new(-jittering, jittering).sample(rng);;
+        let jitter_uniform = Uniform::new(-jittering, jittering);
+        let mut jitter = move || jitter_uniform.sample(rng);;
 
         let width = size.width as f32;
         let height = size.height as f32;
