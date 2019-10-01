@@ -15,12 +15,12 @@ use svg::node::Value;
 use svg::node::element::path::Data;
 use triangulation::{Delaunay, Point};
 use wasm_bindgen::prelude::*;
-use web_sys::console;
 
 use util::FloatExt;
 use voronoi::Voronoi;
 
 #[wasm_bindgen(module = "/modules/ui-util.js")]
+#[cfg(target_arch = "wasm32")]
 extern "C" {
     #[wasm_bindgen(js_name = removeLoading)]
     fn remove_loading();
@@ -34,8 +34,54 @@ extern "C" {
     fn clear_cells();
 }
 
+#[macro_export]
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        if cfg!(target_arch = "wasm32") {
+            web_sys::console::log_1(&format!( $( $t )* ).into());
+        } else {
+            println!( $( $t )* )
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! err {
+    ( $( $t:tt )* ) => {
+        if cfg!(target_arch = "wasm32") {
+            web_sys::console::error_1(&format!( $( $t )* ).into());
+        } else {
+            eprintln!( $( $t )* );
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! time_start {
+    ( $e:expr ) => {
+        if cfg!(target_arch = "wasm32") {
+            web_sys::console::time_with_label($e);
+        } else {
+            // TODO: track start time
+            eprintln!("time_start: {}", $e);
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! time_end {
+    ( $e:expr ) => {
+        if cfg!(target_arch = "wasm32") {
+            web_sys::console::time_end_with_label($e);
+        } else {
+            eprintln!("time_end: {}", $e);
+        }
+    }
+}
+
 #[wasm_bindgen(start)]
 pub fn run() -> Result<(), JsValue> {
+    #[cfg(target_arch = "wasm32")]
     panic::set_hook(Box::new(console_error_panic_hook::hook));
 
     // TODO: Setup SVG
@@ -120,8 +166,8 @@ struct Grid {
 }
 
 impl Grid {
-    fn new(size: Size, density: NonZeroU32, rng: &mut StdRng) -> Self {
-        console::time_with_label("place_points");
+    pub fn new(size: Size, density: NonZeroU32, rng: &mut StdRng) -> Self {
+        time_start!("place_points");
         let cells_desired = 10_000 * density.get();
         // Spacing between points before jittering
         let spacing =
@@ -135,20 +181,19 @@ impl Grid {
         let boundary = Grid::generate_boundary_points(size, spacing);
         // jittered square grid
         let points = Grid::generate_jittered_grid(size, spacing, rng);
-        console::time_end_with_label("place_points");
+        time_end!("place_points");
 
-        console::time_with_label("calculate_delaunay");
+        time_start!("calculate_delaunay");
         let mut allpoints = Vec::with_capacity(points.len() + boundary.len());
         allpoints.extend_from_slice(&points);
         allpoints.extend_from_slice(&boundary);
         let mut delaunay = Delaunay::new(allpoints.as_slice()).unwrap();
         delaunay.dcel.init_revmap();
-        console::time_end_with_label("calculate_delaunay");
+        time_end!("calculate_delaunay");
 
-        console::time_with_label("calculate_voronoi");
+        time_start!("calculate_voronoi");
         let voronoi = Voronoi::from_delaunay(&delaunay, &allpoints, points.len());
-        console::time_end_with_label("calculate_voronoi");
-
+        time_end!("calculate_voronoi");
         // TODO: generate heights
         let heights = vec![0; points.len()];
 
