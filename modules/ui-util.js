@@ -15,7 +15,7 @@ export function undrawAll() {
 
 export function unfog() {
     d3.select("#fog").selectAll("path").remove();
-    let fogging = d3.select("#fogging");
+    const fogging = d3.select("#fogging");
     fogging.selectAll("path").remove();
     fogging.attr("display", "none");
 }
