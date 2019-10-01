@@ -1,5 +1,6 @@
 #![allow(unused_variables)]
 
+mod heightmap;
 mod util;
 mod voronoi;
 
@@ -16,6 +17,7 @@ use svg::node::element::path::Data;
 use triangulation::{Delaunay, Point, PointIndex};
 use wasm_bindgen::prelude::*;
 
+use heightmap::{HeightmapGenerator, Template};
 use util::FloatExt;
 use voronoi::Voronoi;
 
@@ -158,14 +160,16 @@ fn generate_map_on_load(graph_size: Size, density: NonZeroU32) -> Map {
 
 const DENSITY_STEP: u32 = 10_000;
 
-struct Grid {
-    point_spacing: f32,
-    cells_x: u32,
-    cells_y: u32,
-    boundary: Vec<Point>,
-    points: Vec<Point>,
-    voronoi: Voronoi,
-    heights: Vec<u32>,
+pub struct Grid {
+    pub size: Size,
+    pub density: NonZeroU32,
+    pub point_spacing: f32,
+    pub cells_x: u32,
+    pub cells_y: u32,
+    pub boundary: Vec<Point>,
+    pub points: Vec<Point>,
+    pub voronoi: Voronoi,
+    pub heights: Vec<u8>,
 }
 
 impl Grid {
@@ -197,10 +201,12 @@ impl Grid {
         time_start!("calculate_voronoi");
         let voronoi = Voronoi::from_delaunay(&delaunay, &allpoints, points.len());
         time_end!("calculate_voronoi");
-        // TODO: generate heights
-        let heights = vec![0; points.len()];
+
+        let heights = vec![0; voronoi.cells.len()];
 
         Grid {
+            size,
+            density,
             point_spacing: spacing,
             cells_x,
             cells_y,
@@ -284,11 +290,16 @@ impl Map {
     fn generate_with_seed(graph_size: Size, density: NonZeroU32, seed: u64) -> Self {
         let mut rng = StdRng::seed_from_u64(seed);
 
-        let grid = Grid::new(graph_size, density, &mut rng);
-        draw_cells(&grid);
+        let mut grid = Grid::new(graph_size, density, &mut rng);
+
+        time_start!("generate_hightmap");
+        HeightmapGenerator::generate_with_template(&mut grid, &mut rng, Template::Isthmus);
+        time_end!("generate_hightmap");
 
         // TODO: mark features (ocean, lakes, islands)
         // TODO: open near sea lakes
+
+        draw_cells(&grid);
 
         // TODO: calculate map coords
         // TODO: calculate temperatures
