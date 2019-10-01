@@ -16,7 +16,7 @@ pub struct VoronoiCell {
 
 pub struct VoronoiVertex {
     pub coords: Point,
-    pub connected_vertices: Vec<EdgeIndex>,
+    pub connected_vertices: [Option<EdgeIndex>; 3],
     pub connected_cells: [PointIndex; 3],
 }
 
@@ -64,16 +64,21 @@ impl Voronoi {
             // Create a vertex for this triangle if one doesn't yet exist.
             if voronoi.vertices.get(&triangle).is_none() {
                 let point = dcel.triangle(triangle, points).circumcenter();
+                let edges = dcel.triangle_edges(triangle);
+                let mut verts = edges
+                    .iter()
+                    .map(|&e| delaunay.dcel.twin(e).map(|e| delaunay.dcel.triangle_first_edge(e)));
                 let vertex = VoronoiVertex {
                     coords: Point {
                         x: point.x.floor(),
                         y: point.y.floor(),
                     },
-                    connected_vertices: dcel
-                        .triangle_edges(triangle)
-                        .iter()
-                        .filter_map(|&e| delaunay.dcel.twin(e))
-                        .collect(),
+                    // TODO: `flatten` function
+                    connected_vertices: [
+                        verts.next().and_then(|e| e),
+                        verts.next().and_then(|e| e),
+                        verts.next().and_then(|e| e),
+                    ],
                     connected_cells: dcel.triangle_points(triangle),
                 };
                 voronoi.vertices.insert(triangle, vertex);
