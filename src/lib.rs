@@ -173,7 +173,7 @@ impl Grid {
         let cells_desired = DENSITY_STEP * density.get();
         // Spacing between points before jittering
         let spacing =
-            ((size.width * size.height / cells_desired as u32) as f32)
+            ((size.width * size.height / cells_desired) as f32)
             .sqrt()
             .round_decimals(2);
 
