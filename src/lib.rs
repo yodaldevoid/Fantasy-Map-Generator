@@ -3,6 +3,7 @@
 mod heightmap;
 mod util;
 mod voronoi;
+mod svg_test;
 
 use std::iter::successors;
 #[cfg(target_arch = "wasm32")]
@@ -23,6 +24,8 @@ use wasm_bindgen::prelude::*;
 use heightmap::{HeightmapGenerator, OCEAN_HEIGHT, Template, WORLD_MAX};
 use util::FloatExt;
 use voronoi::Voronoi;
+#[cfg(not(target_arch = "wasm32"))]
+use svg_test::*;
 
 #[wasm_bindgen(module = "/modules/ui-util.js")]
 #[cfg(target_arch = "wasm32")]
