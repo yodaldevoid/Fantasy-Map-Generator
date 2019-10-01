@@ -20,11 +20,9 @@ export function unfog() {
     fogging.attr("display", "none");
 }
 
-export function drawCells(cellVertexCoords) {
-    let cells = d3.select("#cells");
+export function drawCells(path) {
+    const cells = d3.select("#cells");
     cells.selectAll("path").remove();
-    let path = "";
-    cellVertexCoords.forEach(i => path += "M" + i);
     cells.append("path").attr("d", path);
 }
 

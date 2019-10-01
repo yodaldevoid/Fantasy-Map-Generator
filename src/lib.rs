@@ -7,11 +7,12 @@ use std::iter::successors;
 use std::panic;
 use std::num::NonZeroU32;
 
-use js_sys::Array;
 use rand::{random, SeedableRng};
 use rand::distributions::Distribution;
 use rand::distributions::uniform::Uniform;
 use rand::rngs::StdRng;
+use svg::node::Value;
+use svg::node::element::path::Data;
 use triangulation::{Delaunay, Point};
 use wasm_bindgen::prelude::*;
 use web_sys::console;
@@ -27,9 +28,8 @@ extern "C" {
     fn undraw_all();
     #[wasm_bindgen]
     fn unfog();
-    // Expects Array<Array<Array>> where innermost array has two elements
     #[wasm_bindgen(js_name = drawCells)]
-    fn __draw_cells(cell_vertex_coords: Array);
+    fn __draw_cells(path: String);
     #[wasm_bindgen(js_name = clearCells)]
     fn clear_cells();
 }
@@ -227,7 +227,7 @@ impl Map {
         let mut rng = StdRng::seed_from_u64(seed);
 
         let grid = Grid::new(graph_size, density, &mut rng);
-        draw_cells(grid.voronoi.get_cell_vertex_coords());
+        draw_cells(&grid);
 
         // TODO: mark features (ocean, lakes, islands)
         // TODO: open near sea lakes
@@ -267,11 +267,19 @@ impl Map {
     // TODO: draw ocean layers
 }
 
-fn draw_cells<'a>(cell_vertex_coords: impl Iterator<Item = impl Iterator<Item = Point> + 'a> + 'a) {
-    let cell_vertex_coords = cell_vertex_coords.map(|i|
-        JsValue::from(i.map(|p|
-            JsValue::from(Array::of2(&JsValue::from(p.x), &JsValue::from(p.y)))
-        ).collect::<Array>())
-    ).collect::<Array>();
-    __draw_cells(cell_vertex_coords);
+fn draw_cells(grid: &Grid) {
+    let mut data = Data::new();
+    for mut vertices in grid.voronoi.get_cell_vertex_coords() {
+        if let Some(start) = vertices.next() {
+            data = data.move_to((start.x, start.y));
+            for vertex in vertices {
+                data = data.line_to((vertex.x, vertex.y));
+            }
+            data = data.close();
+        }
+    }
+
+    let data: Value = data.into();
+
+    __draw_cells(data.to_string());
 }
