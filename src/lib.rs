@@ -156,6 +156,8 @@ fn generate_map_on_load(graph_size: Size, density: NonZeroU32) -> Map {
     map
 }
 
+const DENSITY_STEP: u32 = 10_000;
+
 struct Grid {
     cells_x: u32,
     cells_y: u32,
@@ -168,7 +170,7 @@ struct Grid {
 impl Grid {
     pub fn new(size: Size, density: NonZeroU32, rng: &mut StdRng) -> Self {
         time_start!("place_points");
-        let cells_desired = 10_000 * density.get();
+        let cells_desired = DENSITY_STEP * density.get();
         // Spacing between points before jittering
         let spacing =
             ((size.width * size.height / cells_desired as u32) as f32)
