@@ -29,3 +29,21 @@ export function drawCells(path) {
 export function clearCells() {
     d3.select("#cells").selectAll("path").remove();
 }
+
+export function drawHeightmap(heightPaths, heightColors, heightValues) {
+    clearHeightmap();
+    const terrs = d3.select("#terrs");
+
+    for (let i = 0; i < heightPaths.length; i++) {
+        // TODO: terracing
+        terrs
+            .append("path")
+            .attr("d", heightPaths[i])
+            .attr("fill", heightColors[i])
+            .attr("data-height", heightValues[i]);
+    }
+}
+
+export function clearHeightmap() {
+    d3.select("#terrs").selectAll("*").remove();
+}

@@ -8,6 +8,8 @@ use std::iter::successors;
 use std::panic;
 use std::num::NonZeroU32;
 
+#[cfg(target_arch = "wasm32")]
+use js_sys::{Array, JsString};
 use rand::{random, SeedableRng};
 use rand::distributions::Distribution;
 use rand::distributions::uniform::Uniform;
@@ -17,7 +19,7 @@ use svg::node::element::path::Data;
 use triangulation::{Delaunay, Point, PointIndex};
 use wasm_bindgen::prelude::*;
 
-use heightmap::{HeightmapGenerator, Template};
+use heightmap::{HeightmapGenerator, OCEAN_HEIGHT, Template, WORLD_MAX};
 use util::FloatExt;
 use voronoi::Voronoi;
 
@@ -34,6 +36,15 @@ extern "C" {
     fn __draw_cells(path: String);
     #[wasm_bindgen(js_name = clearCells)]
     fn clear_cells();
+    // All arrays are arrays of strings
+    #[wasm_bindgen(js_name = drawHeightmap)]
+    fn __draw_heightmap(
+        height_paths: Array,
+        height_colors: Array,
+        height_values: &[u8],
+    );
+    #[wasm_bindgen(js_name = clearHeightmap)]
+    fn clear_heightmap();
 }
 
 #[macro_export]
@@ -299,6 +310,7 @@ impl Map {
         // TODO: mark features (ocean, lakes, islands)
         // TODO: open near sea lakes
 
+        draw_heightmap(&grid);
         draw_cells(&grid);
 
         // TODO: calculate map coords
@@ -351,4 +363,188 @@ fn draw_cells(grid: &Grid) {
     let data: Value = data.into();
 
     __draw_cells(data.to_string());
+}
+
+// TODO: skip parameter
+fn draw_heightmap(grid: &Grid) {
+    time_start!("draw_heightmap");
+
+    let mut used = vec![false; grid.voronoi.cells.len()];
+    let mut height_paths = Vec::new();
+    let mut height_colors = Vec::new();
+    let mut height_values = Vec::new();
+
+    let skip = 5;
+
+    let mut current_layer = OCEAN_HEIGHT;
+    let mut ordered_cells: Vec<_> = (0..grid.voronoi.cells.len()).collect();
+    ordered_cells.sort_by_key(|&i| grid.heights[i]);
+    for i in ordered_cells {
+        let h = grid.heights[i];
+        if h > current_layer {
+            current_layer += skip;
+            if current_layer > WORLD_MAX {
+                break;
+            }
+        }
+        if h < current_layer {
+            continue;
+        }
+        if used[i] {
+            continue;
+        }
+
+        let on_border = grid
+            .voronoi
+            .cells[&i.into()]
+            .adjacent_cells
+            .iter()
+            .any(|i| grid.heights[i.as_usize()] < h);
+        if !on_border {
+            continue;
+        }
+        let vertex = grid
+            .voronoi
+            .cells[&i.into()]
+            .vertices
+            .iter()
+            .find(|v|
+                grid.voronoi
+                    .vertices[v]
+                    .connected_cells
+                    .iter()
+                    .any(|&c| !grid.voronoi.is_border_point(c) && grid.heights[c.as_usize()] < h)
+            )
+            .expect("No border vertex found though used for border cell");
+
+        let chain = {
+            let mut chain = Vec::new();
+
+            let start = *vertex;
+            let mut current = start;
+            for _ in 0..20_000 {
+                let prev = chain.last().copied();
+
+                chain.push(current);
+
+                let c = &grid.voronoi.vertices[&current].connected_cells;
+                let v = &grid.voronoi.vertices[&current].connected_vertices;
+
+                for cell in c.iter() {
+                    if !grid.voronoi.is_border_point(*cell) && grid.heights[cell.as_usize()] == h {
+                        used[cell.as_usize()] = true;
+                    }
+                }
+                // Is this vertex connected to a border cell or for a cell of the
+                // right coast type
+                let c0 = grid.voronoi.is_border_point(c[0]) || grid.heights[c[0].as_usize()] < h;
+                let c1 = grid.voronoi.is_border_point(c[1]) || grid.heights[c[1].as_usize()] < h;
+                let c2 = grid.voronoi.is_border_point(c[2]) || grid.heights[c[2].as_usize()] < h;
+
+                // If the connected vertex is not the previous in the chain and it
+                // is between coast types (or next to a border), make it the next
+                // vertex
+                if v[0] != prev && c0 != c1 {
+                    current = v[0].expect("Tried unwrapping connected vertex");
+                } else if v[1] != prev && c1 != c2 {
+                    current = v[1].expect("Tried unwrapping connected vertex");
+                } else if v[2] != prev && c2 != c0 {
+                    current = v[2].expect("Tried unwrapping connected vertex");
+                }
+
+                if current == *chain.last().unwrap() {
+                    err!("Next vertex not found");
+                    break;
+                }
+                if current == start {
+                    break;
+                }
+            }
+
+            chain
+        };
+        if chain.len() < 3 {
+            continue;
+        }
+        // TODO: line simplification
+        let points: Vec<_> = chain.iter().map(|e| grid.voronoi.vertices[e].coords).collect();
+
+        let path: Value = basis_curve_closed_line_gen(&points).into();
+        height_paths.push(path.to_string());
+        height_colors.push(format!{"#00{:02x}00", current_layer * 2});
+        height_values.push(h);
+    }
+
+    _draw_heightmap(
+        &height_paths,
+        &height_colors,
+        &height_values,
+    );
+
+    time_end!("draw_heightmap");
+}
+
+#[cfg(target_arch = "wasm32")]
+fn _draw_heightmap(
+    height_paths: &[String],
+    height_colors: &[String],
+    height_values: &[u8],
+) {
+    __draw_heightmap(
+        height_paths.iter().map(|s| JsString::from(s.as_str())).collect(),
+        height_colors.iter().map(|s| JsString::from(s.as_str())).collect(),
+        &height_values,
+    );
+}
+
+fn basis_curve_closed_line_gen(points: &[Point]) -> Data {
+    let mut data = Data::new();
+
+    match points.len() {
+        0 => {}
+        1 => {
+            data = data
+                .move_to((points[0].x, points[0].y))
+                .close();
+        }
+        2 => {
+            data = data
+                .move_to((
+                    (points[0].x + 2.0 * points[1].x) / 3.0,
+                    (points[0].y + 2.0 * points[1].y) / 3.0,
+                ))
+                .line_to((
+                    (points[1].x + 2.0 * points[0].x) / 3.0,
+                    (points[1].y + 2.0 * points[0].y) / 3.0,
+                ))
+                .close();
+        }
+        _ => {
+            let mut cycle_points = points.to_vec();
+            cycle_points.push(points[0]);
+            cycle_points.push(points[1]);
+            cycle_points.push(points[2]);
+
+            let mut windows = cycle_points.windows(3);
+            if let Some(p) = windows.next() {
+                data = data.move_to((
+                    (p[0].x + 4.0 * p[1].x + p[2].x) / 6.0,
+                    (p[0].y + 4.0 * p[1].y + p[2].y) / 6.0,
+                ));
+
+                for p in windows {
+                    data = data.cubic_curve_to((
+                        (2.0 * p[0].x + p[1].x) / 3.0,
+                        (2.0 * p[0].y + p[1].y) / 3.0,
+                        (p[0].x + 2.0 * p[1].x) / 3.0,
+                        (p[0].y + 2.0 * p[1].y) / 3.0,
+                        (p[0].x + 4.0 * p[1].x + p[2].x) / 6.0,
+                        (p[0].y + 4.0 * p[1].y + p[2].y) / 6.0,
+                    ));
+                }
+            }
+        }
+    }
+
+    data
 }
