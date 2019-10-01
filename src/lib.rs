@@ -5,6 +5,7 @@ mod util;
 mod voronoi;
 
 use std::iter::successors;
+#[cfg(target_arch = "wasm32")]
 use std::panic;
 use std::num::NonZeroU32;
 
