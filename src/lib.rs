@@ -13,7 +13,7 @@ use rand::distributions::uniform::Uniform;
 use rand::rngs::StdRng;
 use svg::node::Value;
 use svg::node::element::path::Data;
-use triangulation::{Delaunay, Point};
+use triangulation::{Delaunay, Point, PointIndex};
 use wasm_bindgen::prelude::*;
 
 use util::FloatExt;
@@ -159,6 +159,7 @@ fn generate_map_on_load(graph_size: Size, density: NonZeroU32) -> Map {
 const DENSITY_STEP: u32 = 10_000;
 
 struct Grid {
+    point_spacing: f32,
     cells_x: u32,
     cells_y: u32,
     boundary: Vec<Point>,
@@ -200,6 +201,7 @@ impl Grid {
         let heights = vec![0; points.len()];
 
         Grid {
+            point_spacing: spacing,
             cells_x,
             cells_y,
             boundary,
@@ -251,6 +253,14 @@ impl Grid {
             }
         }
         points
+    }
+
+    // Return cell index on a regular square grid.
+    pub fn coords_to_cell_index(&self, x: f32, y: f32) -> PointIndex {
+        ((
+            ((x / self.point_spacing) as u32).min(self.cells_x - 1)
+                + ((y / self.point_spacing) as u32).min(self.cells_y - 1) * self.cells_x
+        ) as usize).into()
     }
 }
 
