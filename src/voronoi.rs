@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use triangulation::{Delaunay, EdgeIndex, Point, PointIndex};
 
 pub struct Voronoi {
-    pub center_points: usize,
+    center_points: usize,
     pub cells: HashMap<PointIndex, VoronoiCell>,
     pub vertices: HashMap<EdgeIndex, VoronoiVertex>,
 }
@@ -99,5 +99,9 @@ impl Voronoi {
             .map(PointIndex::from)
             .filter_map(move |p| self.get_cell_vertices(p))
             .map(|i| i.map(|v| v.coords))
+    }
+
+    pub fn is_border_point(&self, p: PointIndex) -> bool {
+        p.as_usize() >= self.center_points
     }
 }
