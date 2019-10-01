@@ -19,7 +19,7 @@ use rand::distributions::uniform::Uniform;
 use rand::rngs::StdRng;
 use svg::node::Value;
 use svg::node::element::path::Data;
-use triangulation::{Delaunay, Point, PointIndex};
+use triangulation::{Delaunay, EdgeIndex, Point, PointIndex};
 use wasm_bindgen::prelude::*;
 
 use heightmap::{HeightmapGenerator, OCEAN_HEIGHT, Template, WORLD_MAX};
@@ -41,6 +41,17 @@ extern "C" {
     fn __draw_cells(path: String);
     #[wasm_bindgen(js_name = clearCells)]
     fn clear_cells();
+    // All arrays are arrays of strings
+    #[wasm_bindgen(js_name = drawCoastline)]
+    fn __draw_coastline(
+        land_mask_paths: Array,
+        water_mask_paths: Array,
+        coastline_paths: Array,
+        coastline_ids: Array,
+        lake_groups: Array,
+        lake_paths: Array,
+        lake_ids: Array,
+    );
     // All arrays are arrays of strings
     #[wasm_bindgen(js_name = drawHeightmap)]
     fn __draw_heightmap(
@@ -432,6 +443,13 @@ impl Map {
         grid.mark_features(&mut rng, seed);
         // TODO: open near sea lakes
 
+        draw_coastline(
+            &grid.voronoi,
+            &grid.heights,
+            &grid.feature_map,
+            &grid.features,
+            &grid.coasts,
+        );
         draw_heightmap(&grid);
         draw_cells(&grid);
 
@@ -485,6 +503,171 @@ fn draw_cells(grid: &Grid) {
     let data: Value = data.into();
 
     __draw_cells(data.to_string());
+}
+
+fn draw_coastline(
+    voronoi: &Voronoi,
+    heights: &[u8],
+    feature_map: &[Option<usize>],
+    features: &[Feature],
+    coasts: &[Coast],
+) {
+    time_start!("draw_coastline");
+
+    let mut used = vec![false; features.len()];
+    let mut land_mask_paths = Vec::new();
+    let mut water_mask_paths = Vec::new();
+    let mut lake_paths = Vec::new();
+    let mut lake_groups = Vec::new();
+    let mut lake_ids = Vec::new();
+    let mut coastline_paths = Vec::new();
+    let mut coastline_ids = Vec::new();
+
+    let find_start = |i: usize, ty: Coast| {
+        let cell = &voronoi.cells[&i.into()];
+        if ty == Coast::Shallows && cell.border_cell {
+            // Use a border cell.
+            cell.vertices
+                .iter()
+                .find(|v|
+                    voronoi.vertices[v]
+                        .connected_cells
+                        .iter()
+                        .any(|&c| voronoi.is_border_point(c))
+                )
+                .copied()
+        } else {
+            cell.adjacent_cells
+                .iter()
+                .enumerate()
+                .filter(|(_, c)| coasts[c.as_usize()] == ty)
+                .min_by_key(|(_, c)| c.as_usize())
+                .map(|(i, _)| i)
+                .map(|i| cell.vertices[i])
+        }
+    };
+
+    let connect_vertices = |start: EdgeIndex, ty: Coast| {
+        let mut chain = Vec::new();
+
+        let mut current = start;
+        for _ in 0..10_000 {
+            let prev = chain.last().copied();
+
+            chain.push(current);
+
+            let c = &voronoi.vertices[&current].connected_cells;
+            let v = &voronoi.vertices[&current].connected_vertices;
+
+            // Is this vertex is on the border or for a cell of the right coast type
+            let c0 = voronoi.is_border_point(c[0]) || coasts[c[0].as_usize()] == ty;
+            let c1 = voronoi.is_border_point(c[1]) || coasts[c[1].as_usize()] == ty;
+            let c2 = voronoi.is_border_point(c[2]) || coasts[c[2].as_usize()] == ty;
+
+            // If the connected vertex is not the previous in the chain and it
+            // is between coast types (or next to a border), make it the next
+            // vertex
+            if v[0] != prev && c0 != c1 {
+                current = v[0].expect("Tried unwrapping connected vertex");
+            } else if v[1] != prev && c1 != c2 {
+                current = v[1].expect("Tried unwrapping connected vertex");
+            } else if v[2] != prev && c2 != c0 {
+                current = v[2].expect("Tried unwrapping connected vertex");
+            }
+
+            if current == *chain.last().unwrap() {
+                err!("Next vertex not found");
+                break;
+            }
+            if current == start {
+                break;
+            }
+        }
+
+        // Make the chain circular.
+        chain.push(chain[0]);
+        chain
+    };
+
+    for i in 0..voronoi.cells.len() {
+        let start_from_edge = i == 0 && heights[i] >= OCEAN_HEIGHT;
+        if !start_from_edge && coasts[i] == Coast::None {
+            // non-edge cell
+            continue;
+        }
+
+        let f = feature_map[i].expect("No mapped feature");
+        if used[f] || features[f].ty == FeatureType::Ocean {
+            continue;
+        }
+
+        let ty = if let FeatureType::Lake(_) = features[f].ty {
+            Coast::Beach
+        } else {
+            Coast::Shallows
+        };
+        let start = find_start(i, ty);
+        if start.is_none() {
+            continue;
+        }
+        let start = start.unwrap();
+
+        let connected_vertices = connect_vertices(start, ty);
+
+        used[f] = true;
+        let points: Vec<_> = connected_vertices
+            .iter()
+            .map(|v| voronoi.vertices[v].coords)
+            .collect();
+
+        // TODO: round coordinates
+        let path: Value = basis_curve_closed_line_gen(&points).into();
+        let id = format!("{}{}", features[f].ty, features[f].index);
+        if let FeatureType::Lake(_) = features[f].ty {
+            land_mask_paths.push(path.to_string());
+            lake_paths.push(path.to_string());
+            lake_groups.push(format!("{}", features[f].ty));
+            lake_ids.push(id);
+        } else {
+            land_mask_paths.push(path.to_string());
+            water_mask_paths.push(path.to_string());
+            coastline_paths.push(path.to_string());
+            coastline_ids.push(id);
+        }
+    }
+
+    _draw_coastline(
+        &land_mask_paths,
+        &water_mask_paths,
+        &coastline_paths,
+        &coastline_ids,
+        &lake_groups,
+        &lake_paths,
+        &lake_ids,
+    );
+
+    time_end!("draw_coastline");
+}
+
+#[cfg(target_arch = "wasm32")]
+fn _draw_coastline(
+    land_mask_paths: &[String],
+    water_mask_paths: &[String],
+    coastline_paths: &[String],
+    coastline_ids: &[String],
+    lake_groups: &[String],
+    lake_paths: &[String],
+    lake_ids: &[String],
+) {
+    __draw_coastline(
+        land_mask_paths.iter().map(|s| JsString::from(s.as_str())).collect(),
+        water_mask_paths.iter().map(|s| JsString::from(s.as_str())).collect(),
+        coastline_paths.iter().map(|s| JsString::from(s.as_str())).collect(),
+        coastline_ids.iter().map(|s| JsString::from(s.as_str())).collect(),
+        lake_groups.iter().map(|s| JsString::from(s.as_str())).collect(),
+        lake_paths.iter().map(|s| JsString::from(s.as_str())).collect(),
+        lake_ids.iter().map(|s| JsString::from(s.as_str())).collect(),
+    );
 }
 
 // TODO: skip parameter
