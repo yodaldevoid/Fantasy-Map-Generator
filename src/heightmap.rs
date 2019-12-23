@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use std::ops::Range;
+use std::ops::{Bound, Range, RangeBounds};
 use std::num::NonZeroU32;
 
 use rand::Rng;
@@ -122,11 +122,11 @@ enum Direction {
     Lower,
 }
 
-fn hill(
+fn hill<C: RangeBounds<f32>>(
     grid: &mut Grid,
     rng: &mut StdRng,
     // Number of hills to place, more or less
-    count: Range<u8>,
+    count: C,
     // Amount to move height up by to create the center point of the hill
     change_height: Range<u8>,
     // Horizontal range to place hills in by percent of horizontal size
@@ -145,10 +145,10 @@ fn hill(
     )
 }
 
-fn pit(
+fn pit<C: RangeBounds<f32>>(
     grid: &mut Grid,
     rng: &mut StdRng,
-    count: Range<u8>,
+    count: C,
     change_height: Range<u8>,
     range_x: Range<f32>,
     range_y: Range<f32>,
@@ -164,10 +164,10 @@ fn pit(
     )
 }
 
-fn alter_point(
+fn alter_point<C: RangeBounds<f32>>(
     grid: &mut Grid,
     rng: &mut StdRng,
-    count: Range<u8>,
+    count: C,
     change_height: Range<u8>,
     range_x: Range<f32>,
     range_y: Range<f32>,
@@ -175,10 +175,20 @@ fn alter_point(
 ) {
     let cells = &grid.voronoi.cells;
 
-    let mut count = Uniform::from(count).sample(rng);
-    if rng.gen() {
-        count += 1;
-    }
+    let count = match (count.start_bound(), count.end_bound()) {
+        (Bound::Included(s), Bound::Excluded(e)) => Uniform::new(s, e).sample(rng),
+        (Bound::Included(s), Bound::Included(e)) => Uniform::new_inclusive(s, e).sample(rng),
+        (Bound::Included(v), Bound::Unbounded)
+        | (Bound::Excluded(v), Bound::Unbounded)
+        | (Bound::Unbounded, Bound::Excluded(v))
+        | (Bound::Unbounded, Bound::Included(v)) => *v,
+        _ => unreachable!(),
+    };
+    let count = if rng.gen::<f32>() < count.fract() {
+        count.trunc() as u32 + 1
+    } else {
+        count.trunc() as u32
+    };
 
     let power = get_blob_power(grid.density);
     let height_uniform = Uniform::from(change_height);
@@ -244,18 +254,28 @@ fn alter_point(
     }
 }
 
-fn range(
+fn range<C: RangeBounds<f32>>(
     grid: &mut Grid,
     rng: &mut StdRng,
-    count: Range<u8>,
+    count: C,
     change_height: Range<u8>,
     range_x: Range<f32>,
     range_y: Range<f32>,
 ) {
-    let mut count = Uniform::from(count).sample(rng);
-    if rng.gen() {
-        count += 1;
-    }
+    let count = match (count.start_bound(), count.end_bound()) {
+        (Bound::Included(s), Bound::Excluded(e)) => Uniform::new(s, e).sample(rng),
+        (Bound::Included(s), Bound::Included(e)) => Uniform::new_inclusive(s, e).sample(rng),
+        (Bound::Included(v), Bound::Unbounded)
+        | (Bound::Excluded(v), Bound::Unbounded)
+        | (Bound::Unbounded, Bound::Excluded(v))
+        | (Bound::Unbounded, Bound::Included(v)) => *v,
+        _ => unreachable!(),
+    };
+    let count = if rng.gen::<f32>() < count.fract() {
+        count.trunc() as u32 + 1
+    } else {
+        count.trunc() as u32
+    };
 
     let height_uniform = Uniform::from(change_height);
     let start_x_uniform = Uniform::new(
@@ -351,18 +371,28 @@ fn range(
     }
 }
 
-fn trough(
+fn trough<C: RangeBounds<f32>>(
     grid: &mut Grid,
     rng: &mut StdRng,
-    count: Range<u8>,
+    count: C,
     change_height: Range<u8>,
     range_x: Range<f32>,
     range_y: Range<f32>,
 ) {
-    let mut count = Uniform::from(count).sample(rng);
-    if rng.gen() {
-        count += 1;
-    }
+    let count = match (count.start_bound(), count.end_bound()) {
+        (Bound::Included(s), Bound::Excluded(e)) => Uniform::new(s, e).sample(rng),
+        (Bound::Included(s), Bound::Included(e)) => Uniform::new_inclusive(s, e).sample(rng),
+        (Bound::Included(v), Bound::Unbounded)
+        | (Bound::Excluded(v), Bound::Unbounded)
+        | (Bound::Unbounded, Bound::Excluded(v))
+        | (Bound::Unbounded, Bound::Included(v)) => *v,
+        _ => unreachable!(),
+    };
+    let count = if rng.gen::<f32>() < count.fract() {
+        count.trunc() as u32 + 1
+    } else {
+        count.trunc() as u32
+    };
 
     let height_uniform = Uniform::from(change_height);
     let start_x_uniform = Uniform::new(
