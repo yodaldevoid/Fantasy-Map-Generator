@@ -148,16 +148,13 @@ pub enum MapCustomization {
     CulturesDraw = 4,
 }
 
-#[wasm_bindgen]
 #[derive(Copy, Clone, Debug)]
 pub struct Size {
     pub width: u32,
     pub height: u32,
 }
 
-#[wasm_bindgen]
 impl Size {
-    #[wasm_bindgen(constructor)]
     pub fn new(width: u32, height: u32) -> Self {
         Size {
             width,
