@@ -29,6 +29,55 @@ pub enum Template {
     Volcano,
 }
 
+pub enum HeightRange {
+    All,
+    Land,
+    Ocean,
+    Range(u8, u8),
+}
+
+impl HeightRange {
+    fn max(&self) -> u8 {
+        match self {
+            HeightRange::All => WORLD_MAX,
+            HeightRange::Land => WORLD_MAX,
+            HeightRange::Ocean => OCEAN_HEIGHT.saturating_sub(1),
+            HeightRange::Range(_, end) => *end,
+        }
+    }
+
+    fn min(&self) -> u8 {
+        match self {
+            HeightRange::All => 0,
+            HeightRange::Land => OCEAN_HEIGHT,
+            HeightRange::Ocean => 0,
+            HeightRange::Range(start, _) => *start,
+        }
+    }
+}
+
+impl<R: RangeBounds<u8>> From<R> for HeightRange {
+    fn from(range: R) -> Self {
+        match (range.start_bound(), range.end_bound()) {
+            (Bound::Included(&s), Bound::Excluded(&e)) =>
+                HeightRange::Range(s, e.saturating_sub(1)),
+            (Bound::Included(&s), Bound::Included(&e)) => HeightRange::Range(s, e),
+            (Bound::Included(&v), Bound::Unbounded) => HeightRange::Range(v, WORLD_MAX),
+            (Bound::Excluded(&v), Bound::Unbounded) =>
+                HeightRange::Range((v + 1).min(WORLD_MAX), WORLD_MAX),
+            (Bound::Unbounded, Bound::Excluded(&v)) => HeightRange::Range(0, v.saturating_sub(1)),
+            (Bound::Unbounded, Bound::Included(&v)) => HeightRange::Range(0, v),
+            (Bound::Unbounded, Bound::Unbounded) => HeightRange::All,
+
+            // I'm not sure this will ever be hit...
+            (Bound::Excluded(&s), Bound::Excluded(&e)) =>
+                HeightRange::Range((s + 1).min(WORLD_MAX), e.saturating_sub(1)),
+            (Bound::Excluded(&s), Bound::Included(&e)) =>
+                HeightRange::Range((s + 1).min(WORLD_MAX), e),
+        }
+    }
+}
+
 pub struct HeightmapGenerator;
 
 impl HeightmapGenerator {
@@ -496,7 +545,29 @@ fn trough<C: RangeBounds<f32>>(
     }
 }
 
-// TODO: `modify` function
+fn add(
+    grid: &mut Grid,
+    rng: &mut StdRng,
+    range: HeightRange,
+    value: i16,
+) {
+    let min = range.min();
+    let max = range.max();
+
+    for h in &mut grid.heights {
+        if *h >= min && *h <= max {
+            *h = if min == OCEAN_HEIGHT {
+                // TODO: decide if I want to keep this.
+                // Maybe add flag to saturate within the range?
+                (*h as i16 + value).min(WORLD_MAX as i16).max(OCEAN_HEIGHT as i16) as u8
+            } else {
+                (*h as i16 + value).min(WORLD_MAX as i16).max(0) as u8
+            };
+        }
+    }
+}
+
+// TODO: `multiply` and `power` functions
 
 // TODO: `strait` function
 
