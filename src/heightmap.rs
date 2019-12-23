@@ -120,53 +120,130 @@ impl HeightmapGenerator {
 
 // Template generation functions
 fn generate_archipelago(grid: &mut Grid, rng: &mut StdRng) {
-    unimplemented!()
+    add(grid, rng, HeightRange::All, 11);
+    range(grid, rng, 2.0..3.0, 40..60, 20.0..80.0, 20.0..80.0);
+    hill(grid, rng, 5.0.., 15..20, 10.0..90.0, 30.0..70.0);
+    hill(grid, rng, 2.0.., 10..15, 10.0..30.0, 20.0..80.0);
+    hill(grid, rng, 2.0.., 10..15, 60.0..90.0, 20.0..80.0);
+    smooth(grid, rng, 3);
+    trough(grid, rng, 10.0.., 20..30, 5.0..95.0, 5.0..95.0);
+    strait(grid, rng, 2.0.., Cartesianality::Vertical);
+    strait(grid, rng, 2.0.., Cartesianality::Horizontal);
 }
 
 fn generate_atoll(grid: &mut Grid, rng: &mut StdRng) {
-    unimplemented!()
+    hill(grid, rng, 1.0.., 75..80, 50.0..60.0, 45.0..55.0);
+    hill(grid, rng, 1.5.., 30..50, 25.0..75.0, 30.0..70.0);
+    hill(grid, rng, 0.5.., 30..50, 25.0..35.0, 30.0..70.0);
+    smooth(grid, rng, 1);
+    multiply(grid, rng, (25..100).into(), 0.2);
+    hill(grid, rng, 0.5.., 10..20, 50.0..55.0, 48.0..52.0);
 }
 
 fn generate_continents(grid: &mut Grid, rng: &mut StdRng) {
-    unimplemented!()
+    hill(grid, rng, 1.0.., 80..85, 75.0..80.0, 40.0..60.0);
+    hill(grid, rng, 1.0.., 80..85, 20.0..25.0, 40.0..60.0);
+    multiply(grid, rng, (20..100).into(), 0.22);
+    hill(grid, rng, 5.0..6.0, 15..20, 25.0..75.0, 20.0..82.0);
+    range(grid, rng, 0.8.., 30..60, 5.0..15.0, 20.0..45.0);
+    range(grid, rng, 0.8.., 30..60, 5.0..15.0, 55.0..80.0);
+    range(grid, rng, 0.0..3.0, 30..60, 80.0..90.0, 20.0..80.0);
+    trough(grid, rng, 3.0..4.0, 15..20, 15.0..85.0, 20.0..80.0);
+    strait(grid, rng, 2.0.., Cartesianality::Vertical);
+    smooth(grid, rng, 2);
+    trough(grid, rng, 1.0..2.0, 5..10, 45.0..55.0, 45.0..55.0);
+    pit(grid, rng, 3.0..4.0, 10..15, 15.0..85.0, 20.0..80.0);
+    hill(grid, rng, 1.0.., 5..10, 40.0..60.0, 40.0..60.0);
 }
 
 fn generate_high_island(grid: &mut Grid, rng: &mut StdRng) {
-    unimplemented!()
+    hill(grid, rng, 1.0.., 90..100, 65.0..75.0, 47.0..53.0);
+    add(grid, rng, HeightRange::All.into(), 5);
+    hill(grid, rng, 6.0.., 20..23, 25.0..55.0, 45.0..55.0);
+    range(grid, rng, 1.0.., 40..50, 45.0..55.0, 45.0..55.0);
+    smooth(grid, rng, 2);
+    trough(grid, rng, 2.0..3.0, 20..30, 20.0..30.0, 20.0..30.0);
+    trough(grid, rng, 2.0..3.0, 20..30, 60.0..80.0, 70.0..80.0);
+    hill(grid, rng, 1.0.., 10..15, 60.0..60.0, 50.0..50.0);
+    hill(grid, rng, 1.5.., 13..16, 15.0..20.0, 20.0..75.0);
+    multiply(grid, rng, (20..100).into(), 0.8);
+    range(grid, rng, 1.5.., 30..40, 15.0..85.0, 30.0..40.0);
+    range(grid, rng, 1.5.., 30..40, 15.0..85.0, 60.0..70.0);
+    pit(grid, rng, 2.0..3.0, 10..15, 15.0..85.0, 20.0..80.0);
 }
 
 fn generate_isthmus(grid: &mut Grid, rng: &mut StdRng) {
-    hill(grid, rng, 5..10, 15..30, 0.0..30.0, 0.0..20.0);
-    hill(grid, rng, 5..10, 15..30, 10.0..50.0, 20.0..40.0);
-    hill(grid, rng, 5..10, 15..30, 30.0..70.0, 40.0..60.0);
-    hill(grid, rng, 5..10, 15..30, 50.0..90.0, 60.0..80.0);
-    hill(grid, rng, 5..10, 15..30, 70.0..100.0, 80.0..100.00);
+    hill(grid, rng, 5.0..10.0, 15..30, 0.0..30.0, 0.0..20.0);
+    hill(grid, rng, 5.0..10.0, 15..30, 10.0..50.0, 20.0..40.0);
+    hill(grid, rng, 5.0..10.0, 15..30, 30.0..70.0, 40.0..60.0);
+    hill(grid, rng, 5.0..10.0, 15..30, 50.0..90.0, 60.0..80.0);
+    hill(grid, rng, 5.0..10.0, 15..30, 70.0..100.0, 80.0..100.00);
     smooth(grid, rng, 2);
-    trough(grid, rng, 4..8, 15..30, 0.0..30.0, 0.0..20.0);
-    trough(grid, rng, 4..8, 15..30, 10.0..50.0, 20.0..40.0);
-    trough(grid, rng, 4..8, 15..30, 30.0..70.0, 40.0..60.0);
-    trough(grid, rng, 4..8, 15..30, 50.0..90.0, 60.0..80.0);
-    trough(grid, rng, 4..8, 15..30, 70.0..100.0, 80.0..100.00);
+    trough(grid, rng, 4.0..8.0, 15..30, 0.0..30.0, 0.0..20.0);
+    trough(grid, rng, 4.0..8.0, 15..30, 10.0..50.0, 20.0..40.0);
+    trough(grid, rng, 4.0..8.0, 15..30, 30.0..70.0, 40.0..60.0);
+    trough(grid, rng, 4.0..8.0, 15..30, 50.0..90.0, 60.0..80.0);
+    trough(grid, rng, 4.0..8.0, 15..30, 70.0..100.0, 80.0..100.00);
 }
 
 fn generate_low_island(grid: &mut Grid, rng: &mut StdRng) {
-    unimplemented!()
+    hill(grid, rng, 1.0.., 90..99, 60.0..80.0, 45.0..55.0);
+    hill(grid, rng, 4.0..5.0, 25..35, 20.0..65.0, 40.0..60.0);
+    range(grid, rng, 1.0.., 40..50, 45.0..55.0, 45.0..55.0);
+    smooth(grid, rng, 3);
+    trough(grid, rng, 1.5.., 20..30, 15.0..85.0, 20.0..30.0);
+    trough(grid, rng, 1.5.., 20..30, 15.0..85.0, 70.0..80.0);
+    hill(grid, rng, 1.5.., 10..15, 5.0..15.0, 20.0..80.0);
+    hill(grid, rng, 1.0.., 10..15, 85.0..95.0, 70.0..80.0);
+    pit(grid, rng, 3.0..5.0, 10..15, 15.0..85.0, 20.0..80.0);
+    multiply(grid, rng, (20..100).into(), 0.4);
 }
 
 fn generate_mediterranean(grid: &mut Grid, rng: &mut StdRng) {
-    unimplemented!()
+    range(grid, rng, 3.0..4.0, 30..50, 0.0..100.0, 0.0..10.0);
+    range(grid, rng, 3.0..4.0, 30..50, 0.0..100.0, 90.0..100.0);
+    hill(grid, rng, 5.0..6.0, 30..70, 0.0..100.0, 0.0..5.0);
+    hill(grid, rng, 5.0..6.0, 30..70, 0.0..100.0, 95.0..100.0);
+    smooth(grid, rng, 1);
+    hill(grid, rng, 2.0..3.0, 30..70, 0.0..5.0, 20.0..80.0);
+    hill(grid, rng, 2.0..3.0, 30..70, 95.0..100.0, 20.0..80.0);
+    multiply(grid, rng, HeightRange::Land.into(), 0.8);
+    trough(grid, rng, 3.0..5.0, 40..50, 0.0..100.0, 0.0..10.0);
+    trough(grid, rng, 3.0..5.0, 40..50, 0.0..100.0, 90.0..100.0);
 }
 
 fn generate_pangaea(grid: &mut Grid, rng: &mut StdRng) {
-    unimplemented!()
+    hill(grid, rng, 1.0..2.0, 25..40, 15.0..50.0, 0.0..10.0);
+    hill(grid, rng, 1.0..2.0, 5..40, 50.0..85.0, 0.0..10.0);
+    hill(grid, rng, 1.0..2.0, 25..40, 50.0..85.0, 90.0..100.0);
+    hill(grid, rng, 1.0..2.0, 5..40, 15.0..50.0, 90.0..100.0);
+    hill(grid, rng, 8.0..12.0, 20..40, 20.0..80.0, 48.0..52.0);
+    smooth(grid, rng, 2);
+    multiply(grid, rng, HeightRange::Land.into(), 0.7);
+    trough(grid, rng, 3.0..4.0, 25..35, 5.0..95.0, 10.0..20.0);
+    trough(grid, rng, 3.0..4.0, 25..35, 5.0..95.0, 80.0..90.0);
+    range(grid, rng, 5.0..6.0, 30..40, 10.0..90.0, 35.0..65.0);
 }
 
 fn generate_peninsula(grid: &mut Grid, rng: &mut StdRng) {
-    unimplemented!()
+    range(grid, rng, 2.0..3.0, 20..35, 40.0..50.0, 0.0..15.0);
+    add(grid, rng, HeightRange::All.into(), 5);
+    hill(grid, rng, 1.0.., 90..100, 10.0..90.0, 0.0..5.0);
+    add(grid, rng, HeightRange::All.into(), 13);
+    hill(grid, rng, 3.0..4.0, 3..5, 5.0..95.0, 80.0..100.0);
+    hill(grid, rng, 1.0..2.0, 3..5, 5.0..95.0, 40.0..60.0);
+    trough(grid, rng, 5.0..6.0, 10..25, 5.0..95.0, 5.0..95.0);
+    smooth(grid, rng, 3);
 }
 
 fn generate_volcano(grid: &mut Grid, rng: &mut StdRng) {
-    unimplemented!()
+    hill(grid, rng, 1.0.., 90..100, 44.0..56.0, 40.0..60.0);
+    multiply(grid, rng, (50..100).into(), 8.0);
+    range(grid, rng, 1.5.., 30..55, 45.0..55.0, 40.0..60.0);
+    smooth(grid, rng, 2);
+    hill(grid, rng, 1.5.., 25..35, 25.0..30.0, 20.0..75.0);
+    hill(grid, rng, 1.0.., 25..35, 75.0..80.0, 25.0..75.0);
+    hill(grid, rng, 0.5.., 20..25, 10.0..15.0, 20.0..25.0);
 }
 
 // Feature generation functions
