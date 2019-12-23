@@ -567,7 +567,30 @@ fn add(
     }
 }
 
-// TODO: `multiply` and `power` functions
+fn multiply(
+    grid: &mut Grid,
+    rng: &mut StdRng,
+    range: HeightRange,
+    value: f32,
+) {
+    let min = range.min();
+    let max = range.max();
+
+    for h in &mut grid.heights {
+        if *h >= min && *h <= max {
+            *h = if min == OCEAN_HEIGHT {
+                // TODO: decide if I want to keep this.
+                // Maybe add flag to saturate within the range?
+                ((*h - OCEAN_HEIGHT) as f32) * value + OCEAN_HEIGHT as f32
+            } else {
+                *h as f32 * value
+            }.min(WORLD_MAX as f32)
+                .max(0.0) as u8
+        }
+    }
+}
+
+// TODO: `power` function
 
 // TODO: `strait` function
 
