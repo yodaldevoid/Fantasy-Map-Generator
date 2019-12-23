@@ -117,7 +117,7 @@ fn generate_volcano(grid: &mut Grid, rng: &mut StdRng) {
 // TODO: refactor paired generators
 // TODO: check that ranges are from low to high
 
-enum Direction {
+enum ModifyDirection {
     Raise,
     Lower,
 }
@@ -141,7 +141,7 @@ fn hill<C: RangeBounds<f32>>(
         change_height,
         range_x,
         range_y,
-        Direction::Raise,
+        ModifyDirection::Raise,
     )
 }
 
@@ -160,7 +160,7 @@ fn pit<C: RangeBounds<f32>>(
         change_height,
         range_x,
         range_y,
-        Direction::Lower,
+        ModifyDirection::Lower,
     )
 }
 
@@ -171,7 +171,7 @@ fn alter_point<C: RangeBounds<f32>>(
     change_height: Range<u8>,
     range_x: Range<f32>,
     range_y: Range<f32>,
-    direction: Direction,
+    direction: ModifyDirection,
 ) {
     let cells = &grid.voronoi.cells;
 
@@ -213,9 +213,9 @@ fn alter_point<C: RangeBounds<f32>>(
             start = grid.coords_to_cell_index(x, y).into();
 
             let good = match direction {
-                Direction::Raise => grid.heights[start] + h <= ((WORLD_MAX as u32 * 9) / 10) as u8,
+                ModifyDirection::Raise => grid.heights[start] + h <= ((WORLD_MAX as u32 * 9) / 10) as u8,
                 // TODO: alter stuff below the ocean as well
-                Direction::Lower => grid.heights[start] >= OCEAN_HEIGHT,
+                ModifyDirection::Lower => grid.heights[start] >= OCEAN_HEIGHT,
             };
             if good {
                 break;
@@ -229,9 +229,9 @@ fn alter_point<C: RangeBounds<f32>>(
         while !queue.is_empty() {
             let q = queue.pop_front().unwrap();
             let h = match direction {
-                Direction::Raise => (change[q] as f32).powf(power),
+                ModifyDirection::Raise => (change[q] as f32).powf(power),
                 // TODO: how does removing this extra randomization affect things?
-                Direction::Lower => (change[q] as f32).powf(power) * change_uniform.sample(rng),
+                ModifyDirection::Lower => (change[q] as f32).powf(power) * change_uniform.sample(rng),
             };
 
             for adjacent in cells[&q.into()].adjacent_cells.iter() {
@@ -247,8 +247,8 @@ fn alter_point<C: RangeBounds<f32>>(
 
         for i in 0..grid.heights.len() {
             match direction {
-                Direction::Raise => grid.heights[i] = grid.heights[i].saturating_add(change[i]),
-                Direction::Lower => grid.heights[i] = grid.heights[i].saturating_sub(change[i]),
+                ModifyDirection::Raise => grid.heights[i] = grid.heights[i].saturating_add(change[i]),
+                ModifyDirection::Lower => grid.heights[i] = grid.heights[i].saturating_sub(change[i]),
             }
         }
     }
