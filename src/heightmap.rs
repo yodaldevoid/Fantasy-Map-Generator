@@ -29,6 +29,13 @@ pub enum Template {
     Volcano,
 }
 
+// Not really a word. Derived from "Cartesian coordinate system".
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+pub enum Cartesianality {
+    Horizontal,
+    Vertical,
+}
+
 pub enum HeightRange {
     All,
     Land,
@@ -592,7 +599,117 @@ fn multiply(
 
 // TODO: `power` function
 
-// TODO: `strait` function
+fn strait<W: RangeBounds<f32>>(
+    grid: &mut Grid,
+    rng: &mut StdRng,
+    width: W,
+    direction: Cartesianality,
+) {
+    let mut width = match (width.start_bound(), width.end_bound()) {
+        (Bound::Included(s), Bound::Excluded(e)) => Uniform::new(s, e).sample(rng),
+        (Bound::Included(s), Bound::Included(e)) => Uniform::new_inclusive(s, e).sample(rng),
+        (Bound::Included(v), Bound::Unbounded)
+        | (Bound::Excluded(v), Bound::Unbounded)
+        | (Bound::Unbounded, Bound::Excluded(v))
+        | (Bound::Unbounded, Bound::Included(v)) => *v,
+        _ => unreachable!(),
+    }.min(grid.cells_x as f32 / 3.0);
+    if width < 1.0 && rng.gen::<f32>() < width {
+        return;
+    }
+
+    let mut used = vec![false; grid.voronoi.cells.len()];
+    let (start_x, start_y, end_x, end_y) = if Cartesianality::Vertical == direction {
+        let start_x = Uniform::new(
+            grid.size.width as f32 * 0.3,
+            grid.size.width as f32 * 0.7,
+        ).sample(rng)
+            .floor();
+
+        let end_x = Uniform::new(
+            (grid.size.width as f32 - start_x) - (grid.size.width as f32 * 0.1),
+            (grid.size.width as f32 - start_x) + (grid.size.width as f32 * 0.1),
+        ).sample(rng)
+            .floor();
+
+        (start_x, 5.0, end_x, (grid.size.height - 5) as f32)
+    } else {
+        let start_y = Uniform::new(
+            grid.size.height as f32 * 0.3,
+            grid.size.height as f32 * 0.7,
+        ).sample(rng)
+            .floor();
+
+        let end_y = Uniform::new(
+            (grid.size.height as f32 - start_y) - (grid.size.height as f32 * 0.1),
+            (grid.size.height as f32 - start_y) + (grid.size.height as f32 * 0.1),
+        ).sample(rng)
+            .floor();
+
+        (5.0, start_y, (grid.size.width - 5) as f32, end_y)
+    };
+
+    let start = grid.coords_to_cell_index(start_x, start_y);
+    let end = grid.coords_to_cell_index(end_x, end_y);
+    let mut range = get_range(grid, rng, start, end);
+
+    let mut query = Vec::new();
+    let step = 0.1 / width;
+    while width > 0.0 {
+        let exp = 0.9 - step * width;
+        for r in range.iter() {
+            for a in grid.voronoi.cells[r].adjacent_cells.iter() {
+                if used[a.as_usize()] {
+                    continue;
+                }
+                used[a.as_usize()] = true;
+                query.push(*a);
+                grid.heights[a.as_usize()] = (grid.heights[a.as_usize()] as f32).powf(exp) as u8;
+                if grid.heights[a.as_usize()] > WORLD_MAX {
+                    grid.heights[a.as_usize()] = 5;
+                }
+            }
+        }
+
+        range.clear();
+        // Technically supposed to be `range.copy_from_slice(query.as_slice())`
+        range.append(&mut query);
+
+        width -= 1.0;
+    }
+
+    fn get_range(
+        grid: &Grid,
+        rng: &mut StdRng,
+        cur: PointIndex,
+        end: PointIndex,
+    ) -> Vec<PointIndex> {
+        let cells = &grid.voronoi.cells;
+        let points = &grid.points;
+        let mut cur = cur;
+
+        let mut range = Vec::new();
+        range.push(cur);
+
+        while cur != end {
+            let mut min = std::f32::INFINITY;
+            for &cell in &cells[&cur].adjacent_cells {
+                let mut diff = (points[end].x - points[cell].x).powi(2)
+                    + (points[end].y - points[cell].y).powi(2);
+                if rng.gen::<f32>() > 0.8 {
+                    diff = diff / 2.0;
+                }
+                if diff < min {
+                    min = diff;
+                    cur = cell;
+                }
+            }
+            range.push(cur);
+        }
+
+        range
+    }
+}
 
 fn smooth(grid: &mut Grid, rng: &mut StdRng, force: u32) {
     let heights = &mut grid.heights;
