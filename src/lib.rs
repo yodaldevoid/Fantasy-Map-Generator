@@ -230,6 +230,8 @@ pub struct Feature {
     land: bool,
     border: bool,
     ty: FeatureType,
+    // Not used in Javascript version
+    //area: Option<f32>,
 }
 
 pub struct Grid {
@@ -397,6 +399,7 @@ impl Grid {
                 land,
                 border,
                 ty,
+                //area: None,
             });
 
             if let Some((idx, _)) = self.feature_map.iter().enumerate().skip_while(|(_, f)| f.is_some()).next() {
@@ -434,12 +437,14 @@ impl Map {
         let mut grid = Grid::new(graph_size, density, &mut rng);
 
         time_start!("generate_hightmap");
-        HeightmapGenerator::generate_with_template(&mut grid, &mut rng, Template::Isthmus);
+        HeightmapGenerator::generate_with_template(&mut grid, &mut rng, Template::Volcano);
         time_end!("generate_hightmap");
 
         grid.mark_features(&mut rng, seed);
         // TODO: open near sea lakes
 
+        //draw_coasts(&grid);
+        //draw_features(&grid);
         draw_coastline(
             &grid.voronoi,
             &grid.heights,
@@ -473,6 +478,7 @@ impl Map {
         // TODO: add markers
 
         // TODO: print stats
+        log!("Generated map with seed {}", seed);
 
         Map {
             seed,
@@ -500,6 +506,78 @@ fn draw_cells(grid: &Grid) {
     let data: Value = data.into();
 
     __draw_cells(data.to_string());
+}
+
+fn draw_coasts(grid: &Grid) {
+    use svg::Document;
+    use svg::node::element::Path;
+
+    let mut doc = Document::new().set("background-color", "white");
+    for c in 0..grid.voronoi.cells.len() {
+        let mut points = grid
+            .voronoi
+            .cells[&c.into()]
+            .vertices
+            .iter()
+            .map(|v| grid.voronoi.vertices[v].coords);
+        if let Some(start) = points.next() {
+            let mut data = Data::new().move_to((start.x, start.y));
+            for vertex in points {
+                data = data.line_to((vertex.x, vertex.y));
+            }
+            data = data.close();
+            let color = match grid.coasts[c] {
+                Coast::None => "white",
+                Coast::Shallows => "blue",
+                Coast::Beach => "green",
+            };
+            let path = Path::new()
+                .set("d", data)
+                .set("fill", color)
+                .set("stroke", "black")
+                .set("stroke-width", 0.1);
+            doc = doc.add(path);
+        }
+    }
+    svg::save("coasts.svg", &doc).expect("SVG failed to save");
+}
+
+fn draw_features(grid: &Grid) {
+    use svg::Document;
+    use svg::node::element::Path;
+
+    let mut doc = Document::new().set("background-color", "white");
+    for c in 0..grid.voronoi.cells.len() {
+        let mut points = grid
+            .voronoi
+            .cells[&c.into()]
+            .vertices
+            .iter()
+            .map(|v| grid.voronoi.vertices[v].coords);
+        if let Some(start) = points.next() {
+            let mut data = Data::new().move_to((start.x, start.y));
+            for vertex in points {
+                data = data.line_to((vertex.x, vertex.y));
+            }
+            data = data.close();
+            let color = if let Some(idx) = grid.feature_map[c] {
+                match grid.features[idx].ty {
+                    FeatureType::Ocean => "blue",
+                    FeatureType::Lake(_) => "cyan",
+                    FeatureType::Island(_) => "green",
+                }
+            } else {
+                "white"
+            };
+            let path = Path::new()
+                .set("d", data)
+                .set("fill", color)
+                .set("stroke", "black")
+                .set("stroke-width", 0.1);
+            doc = doc.add(path);
+        }
+    }
+    svg::save("features.svg", &doc).expect("SVG failed to save");
 }
 
 fn draw_coastline(
@@ -616,6 +694,15 @@ fn draw_coastline(
             .iter()
             .map(|v| voronoi.vertices[v].coords)
             .collect();
+        //let area = polygon_area(&points);
+        // TODO: why?
+        //if let Some(area) = area {
+        //    if area > 0.0 && features[f].ty == FeatureType::Lake {
+        //        points.reverse();
+        //    }
+        //}
+        // TODO: move area calculation out of this function
+        //features[f].area = area.map(|a| a.abs());
 
         // TODO: round coordinates
         let path: Value = basis_curve_closed_line_gen(&points).into();
@@ -668,6 +755,7 @@ fn _draw_coastline(
 }
 
 // TODO: skip parameter
+// TODO: not catching some small islands
 fn draw_heightmap(grid: &Grid) {
     time_start!("draw_heightmap");
 
@@ -797,6 +885,22 @@ fn _draw_heightmap(
         height_colors.iter().map(|s| JsString::from(s.as_str())).collect(),
         &height_values,
     );
+}
+
+fn polygon_area(points: &[Point]) -> Option<f32> {
+    if points.len() < 3 {
+        return None;
+    }
+
+    let mut area = points.last().unwrap().y * points[0].x - points.last().unwrap().x * points[0].y;
+
+    for w in points.windows(2) {
+        let a = &w[0];
+        let b = &w[1];
+        area += a.y * b.x - a.x * b.y;
+    }
+
+    Some(area / 2.0)
 }
 
 fn basis_curve_closed_line_gen(points: &[Point]) -> Data {

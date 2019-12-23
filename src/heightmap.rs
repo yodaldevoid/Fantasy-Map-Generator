@@ -17,16 +17,16 @@ pub const OCEAN_HEIGHT: u8 = 20;
 // TODO: support custom template
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Template {
-    Archipelago,
-    Atoll,
-    Continents,
-    HighIsland,
-    Isthmus,
-    LowIsland,
-    Mediterranean,
-    Pangaea,
-    Peninsula,
-    Volcano,
+    Archipelago, // TODO: needs work
+    Atoll, // TODO: almost right, not lowering enough?
+    Continents, // TODO: almost right, continents not getting separated
+    HighIsland, // TODO: crashes
+    Isthmus, // TODO: too flat, not enough islandy bits
+    LowIsland, // TODO: maybe too high, revisit after fixing others
+    Mediterranean, // TODO: too high, sea not always created
+    Pangaea, // TODO: Too samey, middle seems to be clipping
+    Peninsula, // TODO: Far too high, sea never created
+    Volcano, // TODO: seems good, maybe too high as middle is always clipping
 }
 
 // Not really a word. Derived from "Cartesian coordinate system".
@@ -674,7 +674,14 @@ fn multiply(
     }
 }
 
-// TODO: `power` function
+fn power(
+    grid: &mut Grid,
+    rng: &mut StdRng,
+    range: HeightRange,
+    value: f32,
+) {
+    unimplemented!()
+}
 
 fn strait<W: RangeBounds<f32>>(
     grid: &mut Grid,
